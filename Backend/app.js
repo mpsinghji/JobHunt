@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
+import userRoutes from "./routes/userRoutes.js";
+
 dotenv.config({ path: "./config/config.env" });
 
 const app = express();
@@ -22,6 +24,7 @@ app.get("/", (req, res) => {
         success: true,
     });
 });
+app.use("/api/v1/user",userRoutes);
 
 
 export default app;
