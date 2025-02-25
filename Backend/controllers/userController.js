@@ -143,7 +143,8 @@ export const updateprofile = async (req, res) => {
       user.socialMediaLinks = {
         linkedin: socialMediaLinks.linkedin || user.socialMediaLinks.linkedin,
         github: socialMediaLinks.github || user.socialMediaLinks.github,
-        portfolio: socialMediaLinks.portfolio || user.socialMediaLinks.portfolio
+        portfolio:
+          socialMediaLinks.portfolio || user.socialMediaLinks.portfolio,
       };
     }
 
@@ -158,7 +159,6 @@ export const updateprofile = async (req, res) => {
     return res.status(500).json({ message: "Server error", success: false });
   }
 };
-
 
 // for testing only
 export const getallusers = async (req, res) => {

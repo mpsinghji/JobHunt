@@ -4,6 +4,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 import userRoutes from "./routes/userRoutes.js";
+import companyRoutes from "./routes/companyRoutes.js";
+import jobRoutes from "./routes/jobRoutes.js";
 
 dotenv.config({ path: "./config/config.env" });
 
@@ -25,6 +27,8 @@ app.get("/", (req, res) => {
     });
 });
 app.use("/api/v1/user",userRoutes);
+app.use("/api/v1/company",companyRoutes);
+app.use("/api/v1/job",jobRoutes);
 
 
 export default app;
