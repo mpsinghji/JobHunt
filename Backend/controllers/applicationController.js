@@ -33,7 +33,7 @@ export const applyJob = async (req, res) => {
 export const getAppliedJobs = async (req,res) => {
     try {
         const userId = req.id;
-        const application
+        
     } catch (error) {
         console.log(error);
         return res.statusS(500).json({message:error.message, success:false});
