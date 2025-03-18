@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import Login from './components/auth/Login'
 import Signup from './components/auth/Signup'
 import Home from './components/Home'
+import { Toaster } from "sonner"
 
 const appRouter= createBrowserRouter([
   {
@@ -23,6 +24,7 @@ const App = () => {
   return (
     <>
         <RouterProvider router={appRouter}/>
+        <Toaster position="top-center" richColors />
     </>
   )
 }
