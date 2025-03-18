@@ -4,11 +4,12 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { RadioGroup } from "../ui/radio-group";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { USER_API_END_POINT } from "../utils/constants";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 
 const Login = () => {
   const [input, setInput] = useState({
@@ -16,28 +17,66 @@ const Login = () => {
     password: "",
     role: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
   
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   const submitHandler = async (e) => {
     e.preventDefault();
+    
+    if (!input.email.trim()) {
+      toast.error("Email is required");
+      return;
+    }
+    if (!input.password) {
+      toast.error("Password is required");
+      return;
+    }
+    if (!input.role) {
+      toast.error("Please select a role");
+      return;
+    }
+
+    // Transform role to match backend expectations
+    const loginData = {
+      ...input,
+      role: input.role === "jobseeker" ? "Jobseeker" : "Recruiter"
+    };
+
+    console.log("Login attempt with data:", loginData);
+
     try {
-        const response = await axios.post(`${USER_API_END_POINT}/login`, input,{
-            headers: {
-                "Content-Type": "application/json",
-            },
-            withCredentials: true,
-        });
-        if(response.data.success){
-            navigate("/");
-            toast.success(response.data.message);
-        }
-        console.log(response);
+      const response = await axios.post(`${USER_API_END_POINT}/login`, loginData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        withCredentials: true,
+      });
+
+      console.log("Login response:", response.data);
+
+      if (response.data.success) {
+        toast.success(response.data.message || "Login successful!");
+        navigate("/");
+      } else {
+        toast.error(response.data.message || "Login failed");
+      }
     } catch (error) {
-        toast.error(error.response.data.message);
-        console.log(error);
+      console.error("Login error details:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
+      const errorMessage = error.response?.data?.message || "Login failed. Please try again.";
+      toast.error(errorMessage);
     }
   };
   
@@ -66,21 +105,34 @@ const Login = () => {
                     onChange={changeEventHandler}
                     placeholder="Enter your email"
                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    required
                   />
                 </div>
               </div>
 
               <div>
                 <Label className="block text-sm font-medium text-gray-700">Password</Label>
-                <div className="mt-1">
+                <div className="mt-1 relative">
                   <Input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={input.password}
                     name="password"
                     onChange={changeEventHandler}
                     placeholder="Enter your password"
-                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 pr-10"
+                    required
                   />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
                 </div>
               </div>
 
@@ -91,12 +143,13 @@ const Login = () => {
                     <Input
                       type="radio"
                       name="role"
-                      value="student"
-                      checked={input.role === 'student'}
+                      value="jobseeker"
+                      checked={input.role === 'jobseeker'}
                       onChange={changeEventHandler}
                       className="h-4 w-4 text-blue-600 cursor-pointer"
+                      required
                     />
-                    <Label className="text-sm text-gray-700">Student</Label>
+                    <Label className="text-sm text-gray-700">Jobseeker</Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Input
@@ -106,6 +159,7 @@ const Login = () => {
                       checked={input.role === 'recruiter'}
                       onChange={changeEventHandler}
                       className="h-4 w-4 text-blue-600 cursor-pointer"
+                      required
                     />
                     <Label className="text-sm text-gray-700">Recruiter</Label>
                   </div>
