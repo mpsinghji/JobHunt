@@ -6,7 +6,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { Briefcase, Code, PenTool, Database, Brain, Cpu } from "lucide-react";
 
 const categories = [

@@ -1,6 +1,6 @@
 import React from 'react'
 import LatestJobCards from './LatestJobCards'
-import { Button } from './ui/button'
+import { Button } from '../ui/button'
 
 const randomJobs = [1,2,3,4,5,6];
 

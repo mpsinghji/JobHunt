@@ -11,7 +11,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { setLoading } from "../../redux/authSlice";
+import { setLoading, setUser } from "../../redux/authSlice";
 const Login = () => {
   const [input, setInput] = useState({
     email: "",
@@ -49,6 +49,7 @@ const Login = () => {
       );
       console.log("Login response:", response.data);
       if (response.data.success) {
+        dispatch(setUser(response.data.user));
         toast.success(response.data.message || "Login successful!");
         navigate("/");
       } else {

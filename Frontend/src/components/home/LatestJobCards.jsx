@@ -1,5 +1,5 @@
 import React from "react";
-import { Badge } from "./ui/badge";
+import { Badge } from "../ui/badge";
 import { Building2, MapPin, Clock, DollarSign } from "lucide-react";
 
 const LatestJobCards = () => {
