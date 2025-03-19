@@ -1,5 +1,5 @@
 import React from "react";
-import Navbar from "../Navbar";
+import Navbar from "../shared/Navbar";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
@@ -9,8 +9,9 @@ import { useState } from "react";
 import { USER_API_END_POINT } from "../utils/constants";
 import axios from "axios";
 import { toast } from "sonner";
-import { Eye, EyeOff } from "lucide-react";
-
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { setLoading } from "../../redux/authSlice";
 const Login = () => {
   const [input, setInput] = useState({
     email: "",
@@ -18,50 +19,35 @@ const Login = () => {
     role: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const { loading } = useSelector((state) => state.auth);
   const navigate = useNavigate();
-  
+  const dispatch = useDispatch();
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };
-
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-
   const submitHandler = async (e) => {
     e.preventDefault();
-    
-    if (!input.email.trim()) {
-      toast.error("Email is required");
-      return;
-    }
-    if (!input.password) {
-      toast.error("Password is required");
-      return;
-    }
-    if (!input.role) {
-      toast.error("Please select a role");
-      return;
-    }
-
-    // Transform role to match backend expectations
+    dispatch(setLoading(true));
     const loginData = {
       ...input,
-      role: input.role === "jobseeker" ? "Jobseeker" : "Recruiter"
+      role: input.role === "jobseeker" ? "Jobseeker" : "Recruiter",
     };
-
     console.log("Login attempt with data:", loginData);
-
     try {
-      const response = await axios.post(`${USER_API_END_POINT}/login`, loginData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        withCredentials: true,
-      });
-
+      const response = await axios.post(
+        `${USER_API_END_POINT}/login`,
+        loginData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
       console.log("Login response:", response.data);
-
       if (response.data.success) {
         toast.success(response.data.message || "Login successful!");
         navigate("/");
@@ -72,14 +58,15 @@ const Login = () => {
       console.error("Login error details:", {
         message: error.message,
         response: error.response?.data,
-        status: error.response?.status
+        status: error.response?.status,
       });
-      
-      const errorMessage = error.response?.data?.message || "Login failed. Please try again.";
-      toast.error(errorMessage);
+      toast.error(
+        error.response?.data?.message || "Login failed. Please try again."
+      );
+    } finally {
+      dispatch(setLoading(false));
     }
   };
-  
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -93,10 +80,15 @@ const Login = () => {
               Please sign in to your account
             </p>
           </div>
-          <form onSubmit={submitHandler} className="bg-white py-8 px-6 shadow-xl rounded-lg">
+          <form
+            onSubmit={submitHandler}
+            className="bg-white py-8 px-6 shadow-xl rounded-lg"
+          >
             <div className="space-y-6">
               <div>
-                <Label className="block text-sm font-medium text-gray-700">Email</Label>
+                <Label className="block text-sm font-medium text-gray-700">
+                  Email
+                </Label>
                 <div className="mt-1">
                   <Input
                     type="email"
@@ -109,9 +101,10 @@ const Login = () => {
                   />
                 </div>
               </div>
-
               <div>
-                <Label className="block text-sm font-medium text-gray-700">Password</Label>
+                <Label className="block text-sm font-medium text-gray-700">
+                  Password
+                </Label>
                 <div className="mt-1 relative">
                   <Input
                     type={showPassword ? "text" : "password"}
@@ -135,16 +128,17 @@ const Login = () => {
                   </button>
                 </div>
               </div>
-
               <div>
-                <Label className="block text-sm font-medium text-gray-700 mb-2">Role</Label>
+                <Label className="block text-sm font-medium text-gray-700 mb-2">
+                  Role
+                </Label>
                 <RadioGroup className="flex items-center gap-6">
                   <div className="flex items-center space-x-2">
                     <Input
                       type="radio"
                       name="role"
                       value="jobseeker"
-                      checked={input.role === 'jobseeker'}
+                      checked={input.role === "jobseeker"}
                       onChange={changeEventHandler}
                       className="h-4 w-4 text-blue-600 cursor-pointer"
                       required
@@ -156,7 +150,7 @@ const Login = () => {
                       type="radio"
                       name="role"
                       value="recruiter"
-                      checked={input.role === 'recruiter'}
+                      checked={input.role === "recruiter"}
                       onChange={changeEventHandler}
                       className="h-4 w-4 text-blue-600 cursor-pointer"
                       required
@@ -166,20 +160,22 @@ const Login = () => {
                 </RadioGroup>
               </div>
             </div>
-
-            <div className="mt-6">
-              <Button 
-                type="submit" 
-                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-              >
+            {loading ? (
+              <Button className="w-full my-4" disabled>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait...
+              </Button>
+            ) : (
+              <Button type="submit" className="w-full my-4">
                 Sign in
               </Button>
-            </div>
-
+            )}
             <div className="mt-6 text-center">
               <span className="text-sm text-gray-600">
-                Don't have an account?{' '}
-                <Link to="/signup" className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200">
+                Don't have an account?{" "}
+                <Link
+                  to="/signup"
+                  className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200"
+                >
                   Sign up
                 </Link>
               </span>
@@ -190,5 +186,4 @@ const Login = () => {
     </div>
   );
 };
-
 export default Login;

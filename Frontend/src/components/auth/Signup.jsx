@@ -1,5 +1,5 @@
 import React from "react";
-import Navbar from "../Navbar";
+import Navbar from "../shared/Navbar";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
@@ -9,6 +9,9 @@ import { useState } from "react";
 import axios from "axios";
 import { USER_API_END_POINT } from "../utils/constants";
 import { toast } from "sonner";
+import { useDispatch, useSelector } from "react-redux";
+import { setLoading } from "../../redux/authSlice";
+import { Loader2 } from "lucide-react";
 
 const Signup = () => {
   const [input, setInput] = useState({
@@ -20,6 +23,8 @@ const Signup = () => {
     file: null,
   });
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { loading } = useSelector((state) => state.auth);
 
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
@@ -31,6 +36,7 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    dispatch(setLoading(true));
 
     const formData = new FormData();
     formData.append("fullname", input.fullname.trim());
@@ -66,6 +72,8 @@ const Signup = () => {
       console.error("Registration error:", error);
       const errorMessage = error.response?.data?.message || "Registration failed. Please try again.";
       toast.error(errorMessage);
+    } finally {
+      dispatch(setLoading(false));
     }
   };
 
@@ -188,12 +196,18 @@ const Signup = () => {
             </div>
 
             <div className="mt-6">
-              <Button
-                type="submit"
-                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-              >
-                Create Account
-              </Button>
+              {loading ? (
+                <Button className="w-full my-4" disabled>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait...
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  className="w-full my-4"
+                >
+                  Create Account
+                </Button>
+              )}
             </div>
 
             <div className="mt-6 text-center">
