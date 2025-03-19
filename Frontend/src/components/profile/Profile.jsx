@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Navbar from '../shared/Navbar'
 import { Button } from '../ui/button'
-import { Edit2, Mail, Phone, MapPin, Link as LinkIcon, FileText, Briefcase, User, Code2, BookOpen, Share2 } from 'lucide-react'
+import { Edit2, Mail, Phone, MapPin, Link as LinkIcon, FileText, Briefcase, User, Code2, BookOpen, Share2, Calendar } from 'lucide-react'
 import { Badge } from '../ui/badge'
 import { useSelector } from 'react-redux'
 import UpdateProfileDialog from './UpdateProfileDialog'
@@ -57,9 +57,27 @@ const Profile = () => {
                                     <Phone className="h-4 w-4 text-blue-600" />
                                     <span>{user?.phonenumber || "Your Phone Number"}</span>
                                 </div>
+                            </div>
+                            <div className="mt-4 flex items-start gap-2 text-gray-600">
+                                <MapPin className="h-4 w-4 text-blue-600 mt-1" />
+                                <span className="flex-1">{user?.address || "Your Location"}</span>
+                            </div>
+                            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex items-center gap-2 text-gray-600">
-                                    <MapPin className="h-4 w-4 text-blue-600" />
-                                    <span>{user?.address || "Your Location"}</span>
+                                    <User className="h-4 w-4 text-blue-600" />
+                                    <span>{user?.gender || "Gender not specified"}</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-gray-600">
+                                    <Calendar className="h-4 w-4 text-blue-600" />
+                                    <span>
+                                        {user?.dob 
+                                            ? new Date(user.dob).toLocaleDateString('en-GB', {
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                year: 'numeric'
+                                              })
+                                            : "Date of Birth not specified"}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -99,7 +117,7 @@ const Profile = () => {
                         </div>
 
                         {/* Experience Section */}
-                        <div className="bg-white rounded-2xl shadow-sm p-6">
+                        {/* <div className="bg-white rounded-2xl shadow-sm p-6">
                             <div className="flex items-center gap-2 mb-4">
                                 <Briefcase className="h-5 w-5 text-blue-600" />
                                 <h2 className="text-xl font-semibold text-gray-900">Experience</h2>
@@ -107,7 +125,7 @@ const Profile = () => {
                             <div className="text-gray-600">
                                 {user?.experience || "Add your experience"}
                             </div>
-                        </div>
+                        </div> */}
 
                         {/* Social Links Section */}
                         <div className="bg-white rounded-2xl shadow-sm p-6">

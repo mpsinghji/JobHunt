@@ -129,14 +129,17 @@ export const updateprofile = async (req, res) => {
         .json({ message: "User not found", success: false });
     }
 
+    // Update basic information
     if (fullname) user.fullname = fullname;
     if (email) user.email = email;
     if (phonenumber) user.phonenumber = phonenumber;
+    if (address) user.address = address;
+    if (gender) user.gender = gender;
+    if (dob) user.dob = new Date(dob);
+
+    // Update profile information
     if (bio) user.profile.bio = bio;
     if (skills) user.profile.skills = skillsArray;
-    if (gender) user.gender = gender;
-    if (address) user.address = address;
-    if (dob) user.dob = dob;
 
     // Handle file upload
     if (file) {
@@ -146,12 +149,16 @@ export const updateprofile = async (req, res) => {
 
     // Update social media links
     if (socialMediaLinks) {
-      user.socialMediaLinks = {
-        linkedin: socialMediaLinks.linkedin || user.socialMediaLinks.linkedin,
-        github: socialMediaLinks.github || user.socialMediaLinks.github,
-        portfolio:
-          socialMediaLinks.portfolio || user.socialMediaLinks.portfolio,
-      };
+      try {
+        const parsedLinks = JSON.parse(socialMediaLinks);
+        user.socialMediaLinks = {
+          linkedin: parsedLinks.linkedin || user.socialMediaLinks.linkedin,
+          github: parsedLinks.github || user.socialMediaLinks.github,
+          portfolio: parsedLinks.portfolio || user.socialMediaLinks.portfolio,
+        };
+      } catch (error) {
+        console.error("Error parsing social media links:", error);
+      }
     }
 
     await user.save();
