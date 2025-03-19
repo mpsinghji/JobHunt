@@ -47,6 +47,8 @@ const Signup = () => {
 
     if (input.file) {
       formData.append("file", input.file);
+    } else {
+      formData.append("profilePhoto", `https://avatar.iran.liara.run/public/boy?username=${input.email}`);
     }
 
     for (let pair of formData.entries()) {

@@ -25,7 +25,7 @@ const JobCard = () => {
         <div className="space-y-3 mb-6">
           <div className="flex items-center gap-2 text-gray-600">
             <MapPin className="h-4 w-4" />
-            <span className="text-sm">San Francisco, CA</span>
+            <span className="text-sm">Bangalore, India</span>
           </div>
           <div className="flex items-center gap-2 text-gray-600">
             <Briefcase className="h-4 w-4" />

@@ -50,7 +50,7 @@ const Jobs = () => {
           {/* Jobs Grid */}
           <div className="lg:w-3/4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[1, 2, 3, 4, 5, 6].map((job) => (
+              {[1, 2, 3].map((job) => (
                 <div key={job} className="transform hover:scale-105 transition-transform duration-200">
                   <JobCard />
                 </div>

@@ -1,8 +1,15 @@
 import React from "react";
 import { Button } from "../ui/button";
-import { Search } from "lucide-react";
+import { Search, ChevronDown } from "lucide-react";
 
 const HeroSection = () => {
+  const scrollToContent = () => {
+    window.scrollTo({
+      top: window.innerHeight,
+      behavior: 'smooth'
+    });
+  };
+
   return (
     <div className="relative bg-gradient-to-r from-blue-50 to-indigo-50 overflow-hidden">
       <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-200 rounded-full opacity-20" />
@@ -15,7 +22,7 @@ const HeroSection = () => {
           </div>
           
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight">
-            Search, Apply & Get Your{" "}
+            Search, Apply & Get Your{" "}<br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
               Dream Job
             </span>
@@ -51,6 +58,14 @@ const HeroSection = () => {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Scroll Down Animation */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce cursor-pointer" onClick={scrollToContent}>
+        <div className="flex flex-col items-center text-gray-600">
+          <span className="text-sm mb-2">Scroll Down</span>
+          <ChevronDown className="h-6 w-6 animate-pulse" />
         </div>
       </div>
     </div>
