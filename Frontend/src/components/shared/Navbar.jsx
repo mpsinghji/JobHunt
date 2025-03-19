@@ -53,8 +53,8 @@ const Navbar = () => {
               {/* <li><Link to="/browse">Browse</Link></li> */}
               {!user && (
                 <>
-                  {/* <li><Link to="/aboutus">About Us</Link></li> */}
-                  <li><Link to="/about">About the Developer</Link></li>
+                  <li><Link to="/aboutus">About Us</Link></li>
+                  {/* <li><Link to="/about">About the Developer</Link></li> */}
                 </>
               )}
             </ul>
