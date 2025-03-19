@@ -51,7 +51,12 @@ const Navbar = () => {
               <li><Link to="/">Home</Link></li>
               <li><Link to="/jobs">Browse Jobs Openings</Link></li>
               {/* <li><Link to="/browse">Browse</Link></li> */}
-              <li><Link to="/about">About The Developer</Link></li>
+              {!user && (
+                <>
+                  {/* <li><Link to="/aboutus">About Us</Link></li> */}
+                  <li><Link to="/about">About the Developer</Link></li>
+                </>
+              )}
             </ul>
             {!user ? (
               <div className="flex items-center gap-2">

@@ -2,8 +2,11 @@ import React from "react";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { MapPin, Briefcase, Building2, Clock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const JobCard = () => {
+  const navigate = useNavigate();
+  const JobId = 1;
   return (
     <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
       <div className="p-6">
@@ -51,8 +54,11 @@ const JobCard = () => {
 
         <div className="flex items-center justify-between">
           <div className="text-lg font-semibold text-blue-600">₹12L - ₹15L</div>
+          <Button onClick={() => navigate(`/description/${JobId}`)} variant="outline" className="text-black hover:text-white hover:bg-black rounded-xl">
+            Details
+          </Button>
           <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl transition-all duration-200">
-            Apply Now
+            Save for later
           </Button>
         </div>
       </div>

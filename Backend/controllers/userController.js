@@ -138,6 +138,12 @@ export const updateprofile = async (req, res) => {
     if (address) user.address = address;
     if (dob) user.dob = dob;
 
+    // Handle file upload
+    if (file) {
+      user.profile.resume = file.buffer.toString('base64');
+      user.profile.resumeOriginalName = file.originalname;
+    }
+
     // Update social media links
     if (socialMediaLinks) {
       user.socialMediaLinks = {
@@ -156,7 +162,7 @@ export const updateprofile = async (req, res) => {
       .json({ message: "Profile updated successfully", user, success: true });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Server error", success: false });
+    return res.status(500).json({ message: error.message, success: false });
   }
 };
 
