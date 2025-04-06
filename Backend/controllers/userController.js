@@ -3,6 +3,36 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import cloudinary from "../utils/cloudinary.js";
 import fs from "fs";
+import multer from "multer";
+
+// Update the upload middleware configuration
+const upload = multer({
+    storage: multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, "uploads/");
+        },
+        filename: function (req, file, cb) {
+            cb(null, file.originalname);
+        },
+    }),
+    fileFilter: function (req, file, cb) {
+        if (file.fieldname === "profilePhoto") {
+            if (file.mimetype.startsWith("image/")) {
+                cb(null, true);
+            } else {
+                cb(new Error("Not an image! Please upload an image."), false);
+            }
+        } else if (file.fieldname === "resume") {
+            if (file.mimetype === "application/pdf") {
+                cb(null, true);
+            } else {
+                cb(new Error("Please upload a PDF file"), false);
+            }
+        } else {
+            cb(null, true);
+        }
+    },
+});
 
 export const Register = async (req, res) => {
   try {
@@ -109,105 +139,79 @@ export const logout = async (req, res) => {
 };
 
 export const updateprofile = async (req, res) => {
-  try {
-    console.log("Update profile request:", {
-      body: req.body,
-      files: req.files,
-      userId: req.id
-    });
+    try {
+        console.log("Update profile request:", {
+            body: req.body,
+            files: req.files,
+            userId: req.id
+        });
 
-    const userId = req.id;
-    const {
-      fullname,
-      email,
-      phonenumber,
-      address,
-      gender,
-      dob,
-      profile,
-      socialMediaLinks
-    } = req.body;
+        const user = await User.findById(req.id);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
 
-    // Find the user
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found", success: false });
+        // Handle profile photo upload
+        if (req.files && req.files.profilePhoto) {
+            const result = await cloudinary.uploader.upload(req.files.profilePhoto[0].path, {
+                folder: "profile_photos",
+                resource_type: "auto"
+            });
+            user.profile.profilePhoto = {
+                url: result.secure_url,
+                publicId: result.public_id
+            };
+            fs.unlinkSync(req.files.profilePhoto[0].path);
+        }
+
+        // Handle resume upload
+        if (req.files && req.files.resume) {
+            const result = await cloudinary.uploader.upload(req.files.resume[0].path, {
+                folder: "resumes",
+                resource_type: "raw",
+                format: "pdf"
+            });
+            user.profile.resume = {
+                url: result.secure_url,
+                publicId: result.public_id,
+                originalName: req.files.resume[0].originalname,
+                updatedAt: new Date()
+            };
+            fs.unlinkSync(req.files.resume[0].path);
+        }
+
+        // Update user information
+        if (req.body.fullname) user.fullname = req.body.fullname;
+        if (req.body.email) user.email = req.body.email;
+        if (req.body.phonenumber) user.phonenumber = parseInt(req.body.phonenumber);
+        if (req.body.address) user.address = req.body.address;
+        if (req.body.gender) user.gender = req.body.gender;
+        if (req.body.dob) user.dob = req.body.dob;
+        if (req.body.profile?.bio) user.profile.bio = req.body.profile.bio;
+        if (req.body.profile?.skills) user.profile.skills = req.body.profile.skills;
+        if (req.body.socialMediaLinks) user.socialMediaLinks = req.body.socialMediaLinks;
+
+        await user.save();
+
+        const userWithoutPassword = user.toObject();
+        delete userWithoutPassword.password;
+
+        res.status(200).json({
+            success: true,
+            message: "Profile updated successfully",
+            user: userWithoutPassword
+        });
+    } catch (error) {
+        console.error("Update profile error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error updating profile",
+            error: error.message
+        });
     }
-
-    // Handle profile photo upload
-    if (req.files && req.files.profilePhoto && req.files.profilePhoto[0]) {
-      const profilePhoto = req.files.profilePhoto[0];
-      const result = await cloudinary.uploader.upload(profilePhoto.path, {
-        folder: "profiles",
-        resource_type: "auto",
-      });
-      user.profile.profilePhoto = {
-        url: result.secure_url,
-        publicId: result.public_id
-      };
-      // Clean up the temporary file
-      fs.unlinkSync(profilePhoto.path);
-    }
-
-    // Handle resume upload
-    if (req.files && req.files.resume && req.files.resume[0]) {
-      const resume = req.files.resume[0];
-      const result = await cloudinary.uploader.upload(resume.path, {
-        folder: "resumes",
-        resource_type: "auto",
-      });
-      user.profile.resume = {
-        url: result.secure_url,
-        publicId: result.public_id,
-        originalName: resume.originalname
-      };
-      // Clean up the temporary file
-      fs.unlinkSync(resume.path);
-    }
-
-    // Update basic information
-    if (fullname) user.fullname = fullname;
-    if (email) user.email = email;
-    if (phonenumber) user.phonenumber = parseInt(phonenumber);
-    if (address) user.address = address;
-    if (gender) user.gender = gender;
-    if (dob) user.dob = new Date(dob);
-
-    // Update profile information
-    if (profile) {
-      if (profile.bio) user.profile.bio = profile.bio;
-      if (profile.skills) {
-        user.profile.skills = profile.skills.split(",").map(skill => skill.trim());
-      }
-    }
-
-    // Update social media links
-    if (socialMediaLinks) {
-      user.socialMediaLinks = {
-        linkedin: socialMediaLinks.linkedin || user.socialMediaLinks.linkedin,
-        github: socialMediaLinks.github || user.socialMediaLinks.github,
-        portfolio: socialMediaLinks.portfolio || user.socialMediaLinks.portfolio
-      };
-    }
-
-    await user.save();
-
-    // Return updated user without password
-    const updatedUser = await User.findById(userId).select("-password");
-
-    return res.status(200).json({
-      message: "Profile updated successfully",
-      success: true,
-      user: updatedUser
-    });
-  } catch (error) {
-    console.error("Profile update error:", error);
-    return res.status(500).json({ 
-      message: "Failed to update profile", 
-      success: false,
-      error: error.message 
-    });
-  }
 };
 
 export const removeProfilePhoto = async (req, res) => {
@@ -272,4 +276,97 @@ export const getallusers = async (req, res) => {
     console.log(error);
     return res.status(500).json({ message: "Server error", success: false });
   }
+};
+
+// Add new function to remove resume
+export const removeResume = async (req, res) => {
+    try {
+        const user = await User.findById(req.id);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        if (!user.profile.resume) {
+            return res.status(400).json({
+                success: false,
+                message: "No resume found to remove"
+            });
+        }
+
+        // Delete from Cloudinary
+        await cloudinary.uploader.destroy(user.profile.resume.publicId, {
+            resource_type: "raw"
+        });
+
+        // Remove resume from user profile
+        user.profile.resume = undefined;
+        await user.save();
+
+        const userWithoutPassword = user.toObject();
+        delete userWithoutPassword.password;
+
+        res.status(200).json({
+            success: true,
+            message: "Resume removed successfully",
+            user: userWithoutPassword
+        });
+    } catch (error) {
+        console.error("Remove resume error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error removing resume",
+            error: error.message
+        });
+    }
+};
+
+// Add new function to rename resume
+export const renameResume = async (req, res) => {
+    try {
+        const { newName } = req.body;
+        if (!newName) {
+            return res.status(400).json({
+                success: false,
+                message: "New name is required"
+            });
+        }
+
+        const user = await User.findById(req.id);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        if (!user.profile.resume) {
+            return res.status(400).json({
+                success: false,
+                message: "No resume found to rename"
+            });
+        }
+
+        // Update resume name
+        user.profile.resume.originalName = newName;
+        await user.save();
+
+        const userWithoutPassword = user.toObject();
+        delete userWithoutPassword.password;
+
+        res.status(200).json({
+            success: true,
+            message: "Resume renamed successfully",
+            user: userWithoutPassword
+        });
+    } catch (error) {
+        console.error("Rename resume error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error renaming resume",
+            error: error.message
+        });
+    }
 };

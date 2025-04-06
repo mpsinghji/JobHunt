@@ -1,15 +1,20 @@
 import express from 'express';
-import { getallusers, login, logout, Register, updateprofile, removeProfilePhoto } from '../controllers/userController.js';
+import { getallusers, login, logout, Register, updateprofile, removeProfilePhoto, removeResume, renameResume } from '../controllers/userController.js';
 import isAuthenticated from '../middleware/isAuthenticated.js';
-import { singleUpload, uploadFiles } from '../middleware/multer.js';
+import { uploadFiles } from '../middleware/multer.js';
 
 const router = express.Router();
 
-router.post("/register", singleUpload, Register);
+// Auth routes
+router.post("/register", Register);
 router.post("/login", login);
 router.get("/logout", logout);
 router.get("/all", isAuthenticated, getallusers);
+
+// Profile routes
 router.post("/profile/update", isAuthenticated, uploadFiles, updateprofile);
 router.post("/profile/remove-photo", isAuthenticated, removeProfilePhoto);
+router.post("/profile/remove-resume", isAuthenticated, removeResume);
+router.post("/profile/rename-resume", isAuthenticated, renameResume);
 
 export default router;

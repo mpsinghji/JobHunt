@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Navbar from '../shared/Navbar'
 import { Button } from '../ui/button'
-import { Edit2, Mail, Phone, MapPin, Link as LinkIcon, FileText, Briefcase, User, Code2, BookOpen, Share2, Calendar, Trash2 } from 'lucide-react'
+import { Edit2, Mail, Phone, MapPin, Link as LinkIcon, FileText, Briefcase, User, Code2, BookOpen, Share2, Calendar, Trash2, Eye, Pencil, MoreVertical } from 'lucide-react'
 import { Badge } from '../ui/badge'
 import { useSelector, useDispatch } from 'react-redux'
 import { setUser } from '../../redux/authSlice'
@@ -19,6 +19,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../ui/alert-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog"
+import {
+  Input
+} from "../ui/input"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu"
 
 const Profile = () => {
     const { user } = useSelector((store) => store.auth);
@@ -26,6 +41,11 @@ const Profile = () => {
     const [open, setOpen] = useState(false);
     const [isRemoving, setIsRemoving] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [showResumeDeleteConfirm, setShowResumeDeleteConfirm] = useState(false);
+    const [showResumeViewer, setShowResumeViewer] = useState(false);
+    const [showResumeRename, setShowResumeRename] = useState(false);
+    const [newResumeName, setNewResumeName] = useState("");
+    const [isRenaming, setIsRenaming] = useState(false);
 
     const handleRemoveProfilePicture = async () => {
         if (!user?.profile?.profilePhoto) {
@@ -44,7 +64,6 @@ const Profile = () => {
             );
 
             if (response.data.success) {
-                // Update the user in Redux with the new data
                 dispatch(setUser(response.data.user));
                 toast.success("Profile picture removed successfully");
             } else {
@@ -56,6 +75,61 @@ const Profile = () => {
         } finally {
             setIsRemoving(false);
             setShowDeleteConfirm(false);
+        }
+    };
+
+    const handleDeleteResume = async () => {
+        try {
+            const response = await axios.post(
+                `${USER_API_END_POINT}/profile/remove-resume`,
+                {},
+                {
+                    withCredentials: true
+                }
+            );
+
+            if (response.data.success) {
+                dispatch(setUser(response.data.user));
+                toast.success("Resume removed successfully");
+            } else {
+                toast.error(response.data.message || "Failed to remove resume");
+            }
+        } catch (error) {
+            console.error("Remove resume error:", error);
+            toast.error(error.response?.data?.message || "Failed to remove resume");
+        } finally {
+            setShowResumeDeleteConfirm(false);
+        }
+    };
+
+    const handleRenameResume = async () => {
+        if (!newResumeName.trim()) {
+            toast.error("Please enter a valid name");
+            return;
+        }
+
+        try {
+            setIsRenaming(true);
+            const response = await axios.post(
+                `${USER_API_END_POINT}/profile/rename-resume`,
+                { newName: newResumeName },
+                {
+                    withCredentials: true
+                }
+            );
+
+            if (response.data.success) {
+                dispatch(setUser(response.data.user));
+                toast.success("Resume renamed successfully");
+                setShowResumeRename(false);
+            } else {
+                toast.error(response.data.message || "Failed to rename resume");
+            }
+        } catch (error) {
+            console.error("Rename resume error:", error);
+            toast.error(error.response?.data?.message || "Failed to rename resume");
+        } finally {
+            setIsRenaming(false);
         }
     };
 
@@ -247,52 +321,61 @@ const Profile = () => {
                                     <FileText className="h-5 w-5 text-blue-600" />
                                     Resume
                                 </h2>
-                                <Button
-                                    onClick={() => setOpen(true)}
-                                    variant="outline"
-                                    size="sm"
-                                    className="gap-2"
-                                >
-                                    <Edit2 className="h-4 w-4" />
-                                    Update Resume
-                                </Button>
                             </div>
                             {user?.profile?.resume ? (
                                 <div className="space-y-4">
-                                    <div className="flex items-center gap-4">
-                                        <FileText className="h-8 w-8 text-blue-600" />
-                                        <div>
-                                            <p className="text-sm text-gray-600">Current Resume</p>
-                                            <a
-                                                href={user.profile.resume.url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                                            >
-                                                View Resume
-                                            </a>
+                                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                        <div className="flex items-center gap-4">
+                                            <div className="bg-blue-100 p-3 rounded-lg">
+                                                <FileText className="h-6 w-6 text-blue-600" />
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">
+                                                    {user.profile.resume.originalName || "Resume"}
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="border rounded-lg overflow-hidden">
-                                        <iframe
-                                            src={user.profile.resume.url}
-                                            className="w-full h-[600px]"
-                                            title="Resume Preview"
-                                            sandbox="allow-scripts allow-same-origin"
-                                        />
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon">
+                                                    <MoreVertical className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="w-40">
+                                                <DropdownMenuItem
+                                                    onClick={() => {
+                                                        setNewResumeName(user.profile.resume.originalName || "");
+                                                        setShowResumeRename(true);
+                                                    }}
+                                                    className="flex items-center gap-2 cursor-pointer"
+                                                >
+                                                    <Pencil className="h-4 w-4" />
+                                                    <span>Rename</span>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
+                                                    onClick={() => setShowResumeDeleteConfirm(true)}
+                                                    className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                    <span>Delete</span>
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="text-center py-8">
-                                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                                    <p className="text-gray-600 mb-4">No resume uploaded yet</p>
-                                    <Button
-                                        onClick={() => setOpen(true)}
-                                        className="gap-2"
-                                    >
-                                        <Edit2 className="h-4 w-4" />
-                                        Upload Resume
-                                    </Button>
+                                    <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                                        <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                        <p className="text-gray-600 mb-4">No resume uploaded yet</p>
+                                        <Button
+                                            onClick={() => setOpen(true)}
+                                            className="gap-2 bg-blue-600 hover:bg-blue-700"
+                                        >
+                                            <Edit2 className="h-4 w-4" />
+                                            Upload Resume
+                                        </Button>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -322,6 +405,75 @@ const Profile = () => {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            {/* Resume Delete Confirmation Dialog */}
+            <AlertDialog open={showResumeDeleteConfirm} onOpenChange={setShowResumeDeleteConfirm}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Resume</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete your resume? This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleDeleteResume}
+                            className="bg-red-500 hover:bg-red-600"
+                        >
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Resume Rename Dialog */}
+            <Dialog open={showResumeRename} onOpenChange={setShowResumeRename}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Rename Resume</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <Input
+                            placeholder="Enter new name"
+                            value={newResumeName}
+                            onChange={(e) => setNewResumeName(e.target.value)}
+                            className="w-full"
+                        />
+                        <div className="flex justify-end gap-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => setShowResumeRename(false)}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleRenameResume}
+                                disabled={isRenaming}
+                                className="bg-blue-600 hover:bg-blue-700"
+                            >
+                                {isRenaming ? "Renaming..." : "Rename"}
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Resume Viewer Dialog */}
+            <Dialog open={showResumeViewer} onOpenChange={setShowResumeViewer}>
+                <DialogContent className="max-w-4xl h-[80vh]">
+                    <DialogHeader>
+                        <DialogTitle>Resume Preview</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex-1 h-full">
+                        <iframe
+                            src={user?.profile?.resume?.url}
+                            className="w-full h-full"
+                            title="Resume Preview"
+                        />
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }

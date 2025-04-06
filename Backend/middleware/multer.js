@@ -1,30 +1,28 @@
 import multer from "multer";
-import path from "path";
 
 // Configure multer for disk storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/'); // Make sure this directory exists
+    cb(null, "uploads/");
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
+    cb(null, file.originalname);
+  },
 });
 
 // File filter to accept only specific file types
 const fileFilter = (req, file, cb) => {
-  if (file.fieldname === 'resume') {
-    if (file.mimetype === 'application/pdf') {
+  if (file.fieldname === "profilePhoto") {
+    if (file.mimetype.startsWith("image/")) {
       cb(null, true);
     } else {
-      cb(new Error('Only PDF files are allowed for resumes'), false);
+      cb(new Error("Not an image! Please upload an image."), false);
     }
-  } else if (file.fieldname === 'profilePhoto') {
-    if (file.mimetype.startsWith('image/')) {
+  } else if (file.fieldname === "resume") {
+    if (file.mimetype === "application/pdf") {
       cb(null, true);
     } else {
-      cb(new Error('Only image files are allowed for profile photos'), false);
+      cb(new Error("Please upload a PDF file"), false);
     }
   } else {
     cb(null, true);
@@ -32,22 +30,15 @@ const fileFilter = (req, file, cb) => {
 };
 
 // Export multiple upload configurations
-export const uploadFiles = multer({ 
+export const upload = multer({
   storage: storage,
-  fileFilter: fileFilter,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  }
-}).fields([
-  { name: 'resume', maxCount: 1 },
-  { name: 'profilePhoto', maxCount: 1 }
-]);
+  fileFilter: fileFilter
+});
 
 // For single file uploads
-export const singleUpload = multer({ 
-  storage: storage,
-  fileFilter: fileFilter,
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  }
-}).single('file');
+export const singleUpload = upload.single("profilePhoto");
+
+export const uploadFiles = upload.fields([
+  { name: "profilePhoto", maxCount: 1 },
+  { name: "resume", maxCount: 1 }
+]);
