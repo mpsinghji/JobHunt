@@ -171,7 +171,7 @@ export const updateprofile = async (req, res) => {
         if (req.files && req.files.resume) {
             const result = await cloudinary.uploader.upload(req.files.resume[0].path, {
                 folder: "resumes",
-                resource_type: "raw",
+                resource_type: "image",
                 format: "pdf"
             });
             user.profile.resume = {

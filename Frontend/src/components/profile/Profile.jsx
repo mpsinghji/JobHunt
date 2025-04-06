@@ -46,6 +46,7 @@ const Profile = () => {
     const [showResumeRename, setShowResumeRename] = useState(false);
     const [newResumeName, setNewResumeName] = useState("");
     const [isRenaming, setIsRenaming] = useState(false);
+    const [resumePreviewUrl, setResumePreviewUrl] = useState(null);
 
     const handleRemoveProfilePicture = async () => {
         if (!user?.profile?.profilePhoto) {
@@ -130,6 +131,29 @@ const Profile = () => {
             toast.error(error.response?.data?.message || "Failed to rename resume");
         } finally {
             setIsRenaming(false);
+        }
+    };
+
+    const handleViewResume = () => {
+        if (user?.profile?.resume?.url) {
+            // Convert PDF URL to use Cloudinary's page transformation
+            const pdfUrl = user.profile.resume.url;
+            // Extract the base URL and public ID
+            const urlParts = pdfUrl.split('/upload/');
+            if (urlParts.length === 2) {
+                const baseUrl = urlParts[0] + '/upload/';
+                const publicId = urlParts[1].split('.')[0]; // Remove file extension
+                // Create a URL that uses the page transformation to convert PDF to image
+                const imageUrl = `${baseUrl}pg_1/${publicId}.jpg`;
+                setResumePreviewUrl(imageUrl);
+                setShowResumeViewer(true);
+            } else {
+                // Fallback to original URL if transformation fails
+                setResumePreviewUrl(pdfUrl);
+                setShowResumeViewer(true);
+            }
+        } else {
+            toast.error("No resume available to view");
         }
     };
 
@@ -343,6 +367,13 @@ const Profile = () => {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="w-40">
                                                 <DropdownMenuItem
+                                                    onClick={handleViewResume}
+                                                    className="flex items-center gap-2 cursor-pointer"
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                    <span>View</span>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem
                                                     onClick={() => {
                                                         setNewResumeName(user.profile.resume.originalName || "");
                                                         setShowResumeRename(true);
@@ -461,16 +492,41 @@ const Profile = () => {
 
             {/* Resume Viewer Dialog */}
             <Dialog open={showResumeViewer} onOpenChange={setShowResumeViewer}>
-                <DialogContent className="max-w-4xl h-[80vh]">
-                    <DialogHeader>
-                        <DialogTitle>Resume Preview</DialogTitle>
+                <DialogContent className="max-w-5xl h-[95vh] p-0 overflow-hidden">
+                    <DialogHeader className="p-6 border-b">
+                        <DialogTitle className="text-xl font-semibold">Resume Preview</DialogTitle>
                     </DialogHeader>
-                    <div className="flex-1 h-full">
-                        <iframe
-                            src={user?.profile?.resume?.url}
-                            className="w-full h-full"
-                            title="Resume Preview"
-                        />
+                    <div className="flex flex-col h-full">
+                        {resumePreviewUrl ? (
+                            <>
+                                <div className="flex-1 overflow-auto bg-gray-100 p-6 flex items-center justify-center">
+                                    <div className="bg-white rounded-lg shadow-lg p-2 max-w-full max-h-full">
+                                        <img 
+                                            src={resumePreviewUrl} 
+                                            alt="Resume Preview" 
+                                            className="max-w-full max-h-[calc(90vh-200px)] object-contain"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="p-4 border-t bg-gray-50 flex justify-between items-center">
+                                    
+                                    <Button 
+                                        onClick={() => window.open(resumePreviewUrl, '_blank')}
+                                        className="gap-2 bg-blue-600 hover:bg-blue-700"
+                                    >
+                                        <Eye className="h-4 w-4" />
+                                        Open in New Tab
+                                    </Button>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="flex-1 flex items-center justify-center bg-gray-100">
+                                <div className="text-center p-8">
+                                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                    <p className="text-gray-500 text-lg">Failed to load resume preview</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </DialogContent>
             </Dialog>
