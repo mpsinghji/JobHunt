@@ -191,7 +191,18 @@ export const updateprofile = async (req, res) => {
         if (req.body.gender) user.gender = req.body.gender;
         if (req.body.dob) user.dob = req.body.dob;
         if (req.body.profile?.bio) user.profile.bio = req.body.profile.bio;
-        if (req.body.profile?.skills) user.profile.skills = req.body.profile.skills;
+        
+        // Process skills as an array
+        if (req.body.profile?.skills) {
+            // If skills is a string, split by comma and trim whitespace
+            if (typeof req.body.profile.skills === 'string') {
+                user.profile.skills = req.body.profile.skills.split(',').map(skill => skill.trim());
+            } else if (Array.isArray(req.body.profile.skills)) {
+                // If it's already an array, use it directly
+                user.profile.skills = req.body.profile.skills;
+            }
+        }
+        
         if (req.body.socialMediaLinks) user.socialMediaLinks = req.body.socialMediaLinks;
 
         await user.save();
