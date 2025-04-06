@@ -1,14 +1,63 @@
 import React, { useState } from 'react'
 import Navbar from '../shared/Navbar'
 import { Button } from '../ui/button'
-import { Edit2, Mail, Phone, MapPin, Link as LinkIcon, FileText, Briefcase, User, Code2, BookOpen, Share2, Calendar } from 'lucide-react'
+import { Edit2, Mail, Phone, MapPin, Link as LinkIcon, FileText, Briefcase, User, Code2, BookOpen, Share2, Calendar, Trash2 } from 'lucide-react'
 import { Badge } from '../ui/badge'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+import { setUser } from '../../redux/authSlice'
 import UpdateProfileDialog from './UpdateProfileDialog'
+import axios from 'axios'
+import { USER_API_END_POINT } from '../utils/constants'
+import { toast } from 'sonner'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog"
 
 const Profile = () => {
     const { user } = useSelector((store) => store.auth);
+    const dispatch = useDispatch();
     const [open, setOpen] = useState(false);
+    const [isRemoving, setIsRemoving] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+    const handleRemoveProfilePicture = async () => {
+        if (!user?.profile?.profilePhoto) {
+            toast.info("No profile picture to remove");
+            return;
+        }
+
+        try {
+            setIsRemoving(true);
+            const response = await axios.post(
+                `${USER_API_END_POINT}/profile/remove-photo`,
+                {},
+                {
+                    withCredentials: true
+                }
+            );
+
+            if (response.data.success) {
+                // Update the user in Redux with the new data
+                dispatch(setUser(response.data.user));
+                toast.success("Profile picture removed successfully");
+            } else {
+                toast.error(response.data.message || "Failed to remove profile picture");
+            }
+        } catch (error) {
+            console.error("Remove profile picture error:", error);
+            toast.error(error.response?.data?.message || "Failed to remove profile picture");
+        } finally {
+            setIsRemoving(false);
+            setShowDeleteConfirm(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -19,17 +68,29 @@ const Profile = () => {
                     <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                         <div className="relative">
                             <img
-                                src={user?.profilePhoto || `https://avatar.iran.liara.run/public/boy?username=${user?.email}`}
+                                src={user?.profile?.profilePhoto?.url || `https://avatar.iran.liara.run/public/boy?username=${user?.email}`}
                                 alt="Profile"
                                 className="w-40 h-40 rounded-full object-cover border-4 border-blue-100"
                             />
-                            <Button
-                                onClick={() => setOpen(true)}
-                                className="absolute -bottom-2 -right-2 bg-blue-600 hover:bg-blue-700 rounded-full p-2"
-                                size="icon"
-                            >
-                                <Edit2 className="h-4 w-4 text-white" />
-                            </Button>
+                            <div className="absolute -bottom-10 -right-2 flex gap-2">
+                                <Button
+                                    onClick={() => setOpen(true)}
+                                    className="bg-blue-600 hover:bg-blue-700 rounded-full p-2"
+                                    size="icon"
+                                >
+                                    <Edit2 className="h-4 w-4 text-white" />
+                                </Button>
+                                {user?.profile?.profilePhoto && (
+                                    <Button
+                                        onClick={() => setShowDeleteConfirm(true)}
+                                        className="bg-red-500 hover:bg-red-600 rounded-full p-2"
+                                        size="icon"
+                                        disabled={isRemoving}
+                                    >
+                                        <Trash2 className="h-4 w-4 text-white" />
+                                    </Button>
+                                )}
+                            </div>
                         </div>
                         <div className="flex-1 text-center md:text-left">
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -180,29 +241,59 @@ const Profile = () => {
                     {/* Right Column */}
                     <div className="space-y-6">
                         {/* Resume Section */}
-                        <div className="bg-white rounded-2xl shadow-sm p-6">
-                            <div className="flex items-center gap-2 mb-4">
-                                <FileText className="h-5 w-5 text-blue-600" />
-                                <h2 className="text-xl font-semibold text-gray-900">Resume</h2>
+                        <div className="bg-white rounded-2xl shadow-sm p-6 mb-8">
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                                    <FileText className="h-5 w-5 text-blue-600" />
+                                    Resume
+                                </h2>
+                                <Button
+                                    onClick={() => setOpen(true)}
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-2"
+                                >
+                                    <Edit2 className="h-4 w-4" />
+                                    Update Resume
+                                </Button>
                             </div>
                             {user?.profile?.resume ? (
                                 <div className="space-y-4">
-                                    <div className="flex items-center gap-2 text-blue-600">
-                                        <FileText className="h-4 w-4" />
-                                        <span className="text-sm font-medium">
-                                            {user.profile.resumeOriginalName || "Resume.pdf"}
-                                        </span>
+                                    <div className="flex items-center gap-4">
+                                        <FileText className="h-8 w-8 text-blue-600" />
+                                        <div>
+                                            <p className="text-sm text-gray-600">Current Resume</p>
+                                            <a
+                                                href={user.profile.resume.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                                            >
+                                                View Resume
+                                            </a>
+                                        </div>
                                     </div>
-                                    <div className="h-[400px] w-full border rounded-lg overflow-hidden">
+                                    <div className="border rounded-lg overflow-hidden">
                                         <iframe
-                                            src={`data:application/pdf;base64,${user.profile.resume}`}
-                                            className="w-full h-full"
+                                            src={user.profile.resume.url}
+                                            className="w-full h-[600px]"
                                             title="Resume Preview"
+                                            sandbox="allow-scripts allow-same-origin"
                                         />
                                     </div>
                                 </div>
                             ) : (
-                                <p className="text-gray-600">No resume uploaded</p>
+                                <div className="text-center py-8">
+                                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                    <p className="text-gray-600 mb-4">No resume uploaded yet</p>
+                                    <Button
+                                        onClick={() => setOpen(true)}
+                                        className="gap-2"
+                                    >
+                                        <Edit2 className="h-4 w-4" />
+                                        Upload Resume
+                                    </Button>
+                                </div>
                             )}
                         </div>
                     </div>
@@ -210,6 +301,27 @@ const Profile = () => {
             </div>
 
             <UpdateProfileDialog open={open} setOpen={setOpen} />
+
+            <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Remove Profile Picture</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to remove your profile picture? This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleRemoveProfilePicture}
+                            className="bg-red-500 hover:bg-red-600"
+                            disabled={isRemoving}
+                        >
+                            {isRemoving ? "Removing..." : "Remove"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }

@@ -18,14 +18,15 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.post(`${USER_API_END_POINT}/logout`, {}, {
+      await axios.get(`${USER_API_END_POINT}/logout`, {
         withCredentials: true
       });
       dispatch(logout());
       toast.success("Logged out successfully");
       navigate("/");
     } catch (error) {
-      toast.error("Failed to logout. Please try again.");
+      console.error("Logout error:", error);
+      toast.error(error.response?.data?.message || "Failed to logout. Please try again.");
     }
   };
 
@@ -35,6 +36,20 @@ const Navbar = () => {
       .map(word => word[0])
       .join('')
       .toUpperCase();
+  };
+
+  const getProfileImage = () => {
+    console.log("User data:", user);
+    
+    // Check if profile photo exists and has a URL
+    if (user?.profile?.profilePhoto?.url) {
+      console.log("Using profile photo URL:", user.profile.profilePhoto.url);
+      return user.profile.profilePhoto.url;
+    }
+    
+    // Fallback to a default avatar based on email
+    console.log("Using default avatar");
+    return `https://avatar.iran.liara.run/public/boy?username=${user?.email}`;
   };
 
   return (
@@ -50,11 +65,9 @@ const Navbar = () => {
             <ul className="flex font-medium items-center gap-5">
               <li><Link to="/">Home</Link></li>
               <li><Link to="/jobs">Browse Jobs Openings</Link></li>
-              {/* <li><Link to="/browse">Browse</Link></li> */}
               {!user && (
                 <>
                   <li><Link to="/aboutus">About Us</Link></li>
-                  {/* <li><Link to="/about">About the Developer</Link></li> */}
                 </>
               )}
             </ul>
@@ -66,11 +79,15 @@ const Navbar = () => {
             ) : (
               <Popover className="cursor-pointer">
                 <PopoverTrigger asChild>
-                  <Avatar>
+                  <Avatar className="h-10 w-10">
                     <AvatarImage
-                      src={user.profile?.profilePhoto || `https://avatar.iran.liara.run/public/boy?username=${user.email}`}
+                      src={getProfileImage()}
                       alt={user.fullname}
                       onLoad={() => setImageLoaded(true)}
+                      onError={(e) => {
+                        console.error("Image load error:", e);
+                        setImageLoaded(false);
+                      }}
                       className={imageLoaded ? 'opacity-100' : 'opacity-0'}
                     />
                     <AvatarFallback className="bg-blue-100 text-blue-600">
@@ -80,11 +97,15 @@ const Navbar = () => {
                 </PopoverTrigger>
                 <PopoverContent className="w-80">
                   <div className="flex gap-4 space-y-2">
-                    <Avatar>
+                    <Avatar className="h-12 w-12">
                       <AvatarImage
-                        src={user.profile?.profilePhoto || `https://avatar.iran.liara.run/public/boy?username=${user.email}`}
+                        src={getProfileImage()}
                         alt={user.fullname}
                         onLoad={() => setImageLoaded(true)}
+                        onError={(e) => {
+                          console.error("Image load error:", e);
+                          setImageLoaded(false);
+                        }}
                         className={imageLoaded ? 'opacity-100' : 'opacity-0'}
                       />
                       <AvatarFallback className="bg-blue-100 text-blue-600">

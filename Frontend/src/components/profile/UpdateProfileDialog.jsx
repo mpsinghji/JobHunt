@@ -8,7 +8,7 @@ import {
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { Loader2, Mail, Phone, MapPin, Link as LinkIcon, User, Calendar } from "lucide-react";
+import { Loader2, Mail, Phone, MapPin, Link as LinkIcon, User, Calendar, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { useSelector } from "react-redux";
 import { USER_API_END_POINT } from "./../utils/constants";
@@ -46,7 +46,10 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
     }
   });
 
-  const [file, setFile] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState({
+    profilePhoto: null,
+    resume: null
+  });
 
   const changeEventHandler = (e) => {
     const { name, value } = e.target;
@@ -64,48 +67,91 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
     }
   };
 
-  const fileChangeHandler = (e) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      setInput(prev => ({ ...prev, resume: selectedFile.name }));
+  const fileChangeHandler = (e, type) => {
+    const file = e.target.files[0];
+    if (file) {
+      console.log(`Selected ${type}:`, {
+        name: file.name,
+        type: file.type,
+        size: file.size
+      });
+      setSelectedFiles(prev => ({
+        ...prev,
+        [type]: file
+      }));
     }
+  };
+
+  const handleFileDelete = (fieldName) => {
+    setSelectedFiles(prev => ({
+      ...prev,
+      [fieldName]: null
+    }));
+    // Reset the file input
+    const fileInput = document.getElementById(fieldName);
+    if (fileInput) fileInput.value = '';
   };
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    console.log(input);
-    const formData = new FormData();
-    
-    // Append all input fields
-    Object.keys(input).forEach(key => {
-      if (key === 'socialMediaLinks') {
-        formData.append(key, JSON.stringify(input[key]));
-      } else {
-        formData.append(key, input[key]);
-      }
-    });
-
-    if (file) {
-      formData.append("file", file);
-    }
+    setLoading(true);
 
     try {
-      setLoading(true);
-      const res = await axios.post(`${USER_API_END_POINT}/profile/update`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
-        withCredentials: true
-      });
+      const formData = new FormData();
+      
+      // Append basic info
+      formData.append("fullname", input.fullname);
+      formData.append("email", input.email);
+      formData.append("phonenumber", input.phonenumber);
+      formData.append("role", user.role);
+      formData.append("address", input.address || "");
+      formData.append("gender", input.gender || "");
+      if (input.dob) {
+        formData.append("dob", new Date(input.dob).toISOString());
+      }
 
-      if (res.data.success) {
-        dispatch(setUser(res.data.user));
-        toast.success(res.data.message);
+      // Append profile info
+      formData.append("profile[bio]", input.bio || "");
+      formData.append("profile[skills]", input.skills || "");
+
+      // Append social media links
+      formData.append("socialMediaLinks[linkedin]", input.socialMediaLinks.linkedin || "");
+      formData.append("socialMediaLinks[github]", input.socialMediaLinks.github || "");
+      formData.append("socialMediaLinks[portfolio]", input.socialMediaLinks.portfolio || "");
+
+      // Append files if selected
+      if (selectedFiles.profilePhoto) {
+        formData.append("profilePhoto", selectedFiles.profilePhoto);
+      }
+      if (selectedFiles.resume) {
+        formData.append("resume", selectedFiles.resume);
+      }
+
+      // Log form data for debugging
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+      }
+
+      const response = await axios.post(
+        `${USER_API_END_POINT}/profile/update`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          },
+          withCredentials: true
+        }
+      );
+
+      if (response.data.success) {
+        dispatch(setUser(response.data.user));
+        toast.success("Profile updated successfully");
         setOpen(false);
+      } else {
+        toast.error(response.data.message || "Failed to update profile");
       }
     } catch (error) {
-      console.error("Update error:", error);
+      console.error("Profile update error:", error);
       toast.error(error.response?.data?.message || "Failed to update profile");
     } finally {
       setLoading(false);
@@ -114,7 +160,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-gray-900">Update Profile</DialogTitle>
         </DialogHeader>
@@ -149,6 +195,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                   value={input.email}
                   onChange={changeEventHandler}
                   className="w-full"
+                  disabled
                 />
               </div>
               <div className="space-y-2">
@@ -248,15 +295,38 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                   placeholder="Enter skills (comma separated)"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="resume">Resume</Label>
-                <Input
-                  type="file"
-                  id="resume"
-                  name="resume"
-                  accept="application/pdf"
-                  onChange={fileChangeHandler}
-                />
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="profilePhoto">Profile Photo</Label>
+                  <Input
+                    id="profilePhoto"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => fileChangeHandler(e, "profilePhoto")}
+                    className="cursor-pointer"
+                  />
+                  {selectedFiles.profilePhoto && (
+                    <p className="text-sm text-gray-600">
+                      Selected: {selectedFiles.profilePhoto.name}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="resume">Resume (PDF)</Label>
+                  <Input
+                    id="resume"
+                    type="file"
+                    accept=".pdf"
+                    onChange={(e) => fileChangeHandler(e, "resume")}
+                    className="cursor-pointer"
+                  />
+                  {selectedFiles.resume && (
+                    <p className="text-sm text-gray-600">
+                      Selected: {selectedFiles.resume.name}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </div>

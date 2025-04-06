@@ -44,10 +44,16 @@ const userSchema = mongoose.Schema(
     profile: {
       bio: { type: String, default: "" },
       skills: [{ type: String, default: "" }],
-      resume: { type: String, default: "" }, //url rakenge isme
-      resumeOriginalName: { type: String, default: "" },
+      resume: { 
+        url: { type: String, default: "" },
+        publicId: { type: String, default: "" },
+        originalName: { type: String, default: "" }
+      },
       companyName: { type: mongoose.Schema.Types.ObjectId, ref: "Company" },
-      profilePhoto: { type: String, default: "" },
+      profilePhoto: { 
+        url: { type: String, default: "" },
+        publicId: { type: String, default: "" }
+      },
     },
   },
   { timestamps: true }
