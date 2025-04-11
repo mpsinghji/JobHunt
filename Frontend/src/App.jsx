@@ -8,7 +8,6 @@ import JobDescription from "./components/jobs/JobDescription";
 import Browse from "./components/shared/Browse";
 import Profile from "./components/profile/Profile";
 import About from "./components/shared/About";
-import AboutUs from "./components/shared/AboutUs";
 import Status from "./components/shared/Status"
 
 const App = () => {
