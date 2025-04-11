@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { Button } from "../ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
-import { User2, LogOutIcon, User } from "lucide-react";
+import { User2, LogOutIcon, User, ClipboardList } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../redux/authSlice";
@@ -63,13 +63,20 @@ const Navbar = () => {
           </div>
           <div className="flex items-center gap-12">
             <ul className="flex font-medium items-center gap-5">
-              <li><Link to="/">Home</Link></li>
-              <li><Link to="/jobs">Browse Jobs Openings</Link></li>
-              {!user && (
-                <>
-                  <li><Link to="/aboutus">About Us</Link></li>
-                </>
-              )}
+              {
+                user && user.role === 'recruiter' ? (
+                  <>
+                    <li><Link to="/admin/companies">Home</Link></li>
+                    <li><Link to="/admin/jobs">Browse Jobs Openings</Link></li>    
+                  </>
+                ):(
+                  <>
+                    <li><Link to="/">Home</Link></li>
+                    <li><Link to="/jobs">Browse Jobs Openings</Link></li>
+                    {/* <li><Link to="/about">About Me</Link></li> */}
+                  </>
+                )
+              }
             </ul>
             {!user ? (
               <div className="flex items-center gap-2">
@@ -123,6 +130,10 @@ const Navbar = () => {
                     <div className="flex w-fit items-center gap-2 cursor-pointer">
                       <User2 className="w-4 h-4" />
                       <Button variant="link"><Link to="/profile">View Profile</Link></Button>
+                    </div>
+                    <div className="flex w-fit items-center gap-2 cursor-pointer">
+                      <ClipboardList className="w-4 h-4" />
+                      <Button variant="link"><Link to="/status">Applications status</Link></Button>
                     </div>
                     <div className="flex w-fit items-center gap-2 cursor-pointer">
                       <LogOutIcon className="w-4 h-4" />

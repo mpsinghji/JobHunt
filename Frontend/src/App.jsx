@@ -9,6 +9,7 @@ import Browse from "./components/shared/Browse";
 import Profile from "./components/profile/Profile";
 import About from "./components/shared/About";
 import AboutUs from "./components/shared/AboutUs";
+import Status from "./components/shared/Status"
 
 const App = () => {
   return (
@@ -22,8 +23,8 @@ const App = () => {
         <Route path="/description/:id" element={<JobDescription />} />
         <Route path="/browse" element={<Browse />} />
         <Route path="/about" element={<About />} />
-        <Route path="/aboutus" element={<AboutUs />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/status" element={<Status/>} />
       </Routes>
     </Router>
     </>

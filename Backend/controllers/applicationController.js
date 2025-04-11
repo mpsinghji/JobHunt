@@ -4,28 +4,40 @@ import Application from "./../models/applicationModel.js";
 export const applyJob = async (req, res) => {
   try {
     const userId = req.id;
-    const JobId = req.params.id;
-    if(!JobId){
+    const jobId = req.params.id;
+    if(!jobId){
         return res.status(400).json({message:"Job Id is required", success:false});
     }
-    const existingApplication = await Application.findOne({userId, JobId});
+    const existingApplication = await Application.findOne({applicant: userId, job: jobId});
     if(existingApplication){
         return res.status(400).json({message:"You have already applied for this job", success:false});
     }
 
-    const job= await Job.findById(JobId);
+    const job = await Job.findById(jobId);
     if(!job){
         return res.status(404).json({message:"Job not found", success:false});
     }
-    const newApplication = await Application.create({userId, JobId});
+    
+    const newApplication = await Application.create({
+      applicant: userId,
+      job: jobId
+    });
+    
     job.application.push(newApplication._id);
-
     await job.save();
-    return res.status(201).json({message:"Application submitted successfully", success:true});
+    
+    return res.status(201).json({
+      message: "Application submitted successfully", 
+      success: true,
+      application: newApplication
+    });
 
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: message.error, success: false });
+    return res.status(500).json({ 
+      message: error.message || "Error applying for job", 
+      success: false 
+    });
   }
 };
 
@@ -77,12 +89,17 @@ export const getApplicants = async (req,res) => {
       };
       return res.status(200).json({
           job, 
-          succees:true
+          success:true
       });
   } catch (error) {
       console.log(error);
+      return res.status(500).json({
+          message: error.message || "Error fetching applicants",
+          success: false
+      });
   }
 }
+
 export const updateStatus = async (req,res) => {
   try {
       const {status} = req.body;
@@ -114,5 +131,9 @@ export const updateStatus = async (req,res) => {
 
   } catch (error) {
       console.log(error);
+      return res.status(500).json({
+          message: error.message || "Error updating application status",
+          success: false
+      });
   }
 }

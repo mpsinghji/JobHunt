@@ -3,7 +3,7 @@ import Navbar from './Navbar'
 import JobCard from '../jobs/JobCard'
 
 const Browse = () => {
-  const randomJobs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  // const randomJobs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   return (
     <div>
         <Navbar />
