@@ -49,7 +49,7 @@ export const getAppliedJobs = async (req,res) => {
           path:'job',
           options:{sort:{createdAt:-1}},
           populate:{
-              path:'company',
+              path:'companyId',
               options:{sort:{createdAt:-1}},
           }
       });
@@ -65,7 +65,7 @@ export const getAppliedJobs = async (req,res) => {
       })
     } catch (error) {
         console.log(error);
-        return res.statusS(500).json({message:error.message, success:false});
+        return res.status(500).json({message:error.message, success:false});
     }
 }
 

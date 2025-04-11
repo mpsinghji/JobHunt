@@ -20,7 +20,7 @@ const Signup = () => {
     phonenumber: "",
     password: "",
     role: "",
-    file: null,
+    profilePhoto: null,
   });
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -31,7 +31,7 @@ const Signup = () => {
   };
 
   const changeFileHandler = (e) => {
-    setInput({ ...input, file: e.target.files?.[0] || null });
+    setInput({ ...input, profilePhoto: e.target.files?.[0] || null });
   };
 
   const handleSubmit = async (e) => {
@@ -45,15 +45,15 @@ const Signup = () => {
     formData.append("password", input.password);
     formData.append("role", input.role === "jobseeker" ? "Jobseeker" : "Recruiter");
 
-    if (input.file) {
-      formData.append("file", input.file);
+    if (input.profilePhoto) {
+      formData.append("profilePhoto", input.profilePhoto);
     } else {
       formData.append("profilePhoto", `https://avatar.iran.liara.run/public/boy?username=${input.email}`);
     }
 
-    // for (let pair of formData.entries()) {
-    //   console.log('FormData:', pair[0], pair[1]);
-    // }
+    for (let pair of formData.entries()) {
+      console.log('FormData:', pair[0], pair[1]);
+    }
 
     try {
       const res = await axios.post(`${USER_API_END_POINT}/register`, formData, {

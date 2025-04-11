@@ -15,6 +15,7 @@ const Jobs = () => {
 
   // Filter jobs based on search query
   useEffect(() => {
+    scrollTo(0,0);
     if (!searchQuery.trim()) {
       setFilteredJobs(allJobs);
       return;

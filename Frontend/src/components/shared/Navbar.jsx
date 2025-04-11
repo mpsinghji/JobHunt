@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
 import { Button } from "../ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
-import { User2, LogOutIcon, User, ClipboardList } from "lucide-react";
+import { User2, LogOutIcon, User, ClipboardList, Building2, Briefcase } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../redux/authSlice";
@@ -19,36 +19,32 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await axios.get(`${USER_API_END_POINT}/logout`, {
-        withCredentials: true
+        withCredentials: true,
       });
       dispatch(logout());
       toast.success("Logged out successfully");
       navigate("/");
     } catch (error) {
       console.error("Logout error:", error);
-      toast.error(error.response?.data?.message || "Failed to logout. Please try again.");
+      toast.error(
+        error.response?.data?.message || "Failed to logout. Please try again."
+      );
     }
   };
 
   const getInitials = (name) => {
     return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
       .toUpperCase();
   };
 
   const getProfileImage = () => {
-    // console.log("User data:", user);
-    
-    // Check if profile photo exists and has a URL
     if (user?.profile?.profilePhoto?.url) {
-      // console.log("Using profile photo URL:", user.profile.profilePhoto.url);
       return user.profile.profilePhoto.url;
     }
-    
-    // Fallback to a default avatar based on email
-    // console.log("Using default avatar");
+
     return `https://avatar.iran.liara.run/public/boy?username=${user?.email}`;
   };
 
@@ -57,31 +53,45 @@ const Navbar = () => {
       <div className="bg-white">
         <div className="flex items-center justify-between mx-auto max-w-7xl h-16">
           <div>
-            <h1 className="text-2xl font-bold">
-              Job<span className="text-blue-500">Hunt</span>
-            </h1>
+            <Link to="/">
+              <h1 className="text-2xl font-bold">
+                Job<span className="text-blue-500">Hunt</span>
+              </h1>
+            </Link>
           </div>
           <div className="flex items-center gap-12">
             <ul className="flex font-medium items-center gap-5">
-              {
-                user && user.role === 'recruiter' ? (
-                  <>
-                    <li><Link to="/admin/companies">Home</Link></li>
-                    <li><Link to="/admin/jobs">Browse Jobs Openings</Link></li>    
-                  </>
-                ):(
-                  <>
-                    <li><Link to="/">Home</Link></li>
-                    <li><Link to="/jobs">Browse Jobs Openings</Link></li>
-                    {/* <li><Link to="/about">About Me</Link></li> */}
-                  </>
-                )
-              }
+              {user && user?.role === "Recruiter" ? (
+                <>
+                  <li>
+                    <Link to="/admin/companies">Home</Link>
+                  </li>
+                  <li>
+                    <Link to="/admin/jobs">Browse Jobs Openings</Link>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li>
+                    <Link to="/">Home</Link>
+                  </li>
+                  <li>
+                    <Link to="/jobs">Browse Jobs Openings</Link>
+                  </li>
+                  {/* <li><Link to="/about">About Me</Link></li> */}
+                </>
+              )}
             </ul>
             {!user ? (
               <div className="flex items-center gap-2">
-                <Link to="/login"><Button variant="outline">Login</Button></Link>
-                <Link to="/signup"><Button className="bg-blue-500 text-white hover">Signup</Button></Link>
+                <Link to="/login">
+                  <Button variant="outline">Login</Button>
+                </Link>
+                <Link to="/signup">
+                  <Button className="bg-blue-500 text-white hover">
+                    Signup
+                  </Button>
+                </Link>
               </div>
             ) : (
               <Popover className="cursor-pointer">
@@ -95,7 +105,7 @@ const Navbar = () => {
                         console.error("Image load error:", e);
                         setImageLoaded(false);
                       }}
-                      className={imageLoaded ? 'opacity-100' : 'opacity-0'}
+                      className={imageLoaded ? "opacity-100" : "opacity-0"}
                     />
                     <AvatarFallback className="bg-blue-100 text-blue-600">
                       {getInitials(user.fullname)}
@@ -113,7 +123,7 @@ const Navbar = () => {
                           console.error("Image load error:", e);
                           setImageLoaded(false);
                         }}
-                        className={imageLoaded ? 'opacity-100' : 'opacity-0'}
+                        className={imageLoaded ? "opacity-100" : "opacity-0"}
                       />
                       <AvatarFallback className="bg-blue-100 text-blue-600">
                         {getInitials(user.fullname)}
@@ -126,20 +136,49 @@ const Navbar = () => {
                       </p>
                     </div>
                   </div>
-                  <div className="flex flex-col my-2 text-gray-600">
-                    <div className="flex w-fit items-center gap-2 cursor-pointer">
-                      <User2 className="w-4 h-4" />
-                      <Button variant="link"><Link to="/profile">View Profile</Link></Button>
-                    </div>
-                    <div className="flex w-fit items-center gap-2 cursor-pointer">
-                      <ClipboardList className="w-4 h-4" />
-                      <Button variant="link"><Link to="/status">Applications status</Link></Button>
-                    </div>
-                    <div className="flex w-fit items-center gap-2 cursor-pointer">
-                      <LogOutIcon className="w-4 h-4" />
-                      <Button variant="link" onClick={handleLogout}>Logout</Button>
-                    </div>
-                  </div>
+                  {user && user?.role === "Recruiter" ? (
+                    <>
+                      <div className="flex flex-col my-2 text-gray-600">
+                        <div className="flex w-fit items-center gap-2 cursor-pointer">
+                          <Building2 className="w-4 h-4" />
+                          <Button variant="link">Register Company</Button>
+                        </div>
+                        <div className="flex w-fit items-center gap-2 cursor-pointer">
+                          <Briefcase className="w-4 h-4" />
+                          <Button variant="link">Create a Job Post</Button>
+                        </div>
+                        <div className="flex w-fit items-center gap-2 cursor-pointer">
+                          <LogOutIcon className="w-4 h-4" />
+                          <Button variant="link" onClick={handleLogout}>
+                            Logout
+                          </Button>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex flex-col my-2 text-gray-600">
+                        <div className="flex w-fit items-center gap-2 cursor-pointer">
+                          <User2 className="w-4 h-4" />
+                          <Button variant="link">
+                            <Link to="/profile">View Profile</Link>
+                          </Button>
+                        </div>
+                        <div className="flex w-fit items-center gap-2 cursor-pointer">
+                          <ClipboardList className="w-4 h-4" />
+                          <Button variant="link">
+                            <Link to="/status">Applications status</Link>
+                          </Button>
+                        </div>
+                        <div className="flex w-fit items-center gap-2 cursor-pointer">
+                          <LogOutIcon className="w-4 h-4" />
+                          <Button variant="link" onClick={handleLogout}>
+                            Logout
+                          </Button>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </PopoverContent>
               </Popover>
             )}

@@ -49,17 +49,69 @@ export const Register = async (req, res) => {
         .json({ message: "Email already exists", success: false });
     }
     const hashPassword = await bcrypt.hash(password, 10);
+    
+    // Convert phonenumber to a number
+    const phoneNumber = parseInt(phonenumber, 10);
+    
+    // Check if the phone number is valid
+    if (isNaN(phoneNumber)) {
+      return res
+        .status(400)
+        .json({ message: "Invalid phone number format", success: false });
+    }
+    
+    // Check if phone number already exists
+    const existingPhone = await User.findOne({ phonenumber: phoneNumber });
+    if (existingPhone) {
+      return res
+        .status(400)
+        .json({ message: "Phone number already exists", success: false });
+    }
+    
+    // Handle profile photo upload
+    let profilePhoto = { url: "", publicId: "" };
+    
+    if (req.files && req.files.profilePhoto) {
+      try {
+        const result = await cloudinary.uploader.upload(req.files.profilePhoto[0].path, {
+          folder: "profile_photos",
+          resource_type: "auto"
+        });
+        profilePhoto = {
+          url: result.secure_url,
+          publicId: result.public_id
+        };
+        // Delete the file from the uploads folder
+        fs.unlinkSync(req.files.profilePhoto[0].path);
+      } catch (uploadError) {
+        console.error("Profile photo upload error:", uploadError);
+        // Continue with registration even if photo upload fails
+      }
+    } else if (req.body.profilePhoto) {
+      // If a URL was provided instead of a file
+      profilePhoto = {
+        url: req.body.profilePhoto,
+        publicId: ""
+      };
+    }
+    
+    // Create the user with profile photo
     await User.create({
       fullname,
       email,
       password: hashPassword,
-      phonenumber,
+      phonenumber: phoneNumber,
       role,
+      profile: {
+        profilePhoto
+      }
     });
+    
     return res
       .status(201)
       .json({ message: "User registered successfully", success: true });
   } catch (error) {
+    console.error("Registration error:", error);
     return res.status(500).json({ message: error.message, success: false });
   }
 };
