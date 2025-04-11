@@ -1,10 +1,12 @@
 import React from 'react'
 import LatestJobCards from './LatestJobCards'
 import { Button } from '../ui/button'
+import { useSelector } from 'react-redux'
+import { Link } from 'react-router-dom'
 
-const randomJobs = [1,2,3,4,5,6];
+const LatestJobs = () => { 
+  const { allJobs } = useSelector((store) => store.job);
 
-const LatestJobs = () => {
   return (
     <div className='space-y-8'>
       <div className='flex items-center justify-between'>
@@ -14,15 +16,23 @@ const LatestJobs = () => {
           </span>{' '}
           Job Openings
         </h2>
-        <Button variant="outline" className="text-blue-600 hover:text-blue-700">
-          View All Jobs
-        </Button>
+        <Link to="/jobs">
+          <Button variant="outline" className="text-blue-600 hover:text-blue-700">
+            View All Jobs
+          </Button>
+        </Link>
       </div>
       
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-        {randomJobs.map((item, index) => (
-          <LatestJobCards key={index} />
-        ))}
+        {allJobs.length <= 0 ? (
+          <div className="col-span-full text-center py-10">
+            <p className="text-gray-500 text-lg">No jobs found</p>
+          </div>
+        ) : (
+          allJobs.slice(0, 6).map((job) => (
+            <LatestJobCards key={job._id} item={job} />
+          ))
+        )}
       </div>
     </div>
   )

@@ -39,16 +39,16 @@ const Navbar = () => {
   };
 
   const getProfileImage = () => {
-    console.log("User data:", user);
+    // console.log("User data:", user);
     
     // Check if profile photo exists and has a URL
     if (user?.profile?.profilePhoto?.url) {
-      console.log("Using profile photo URL:", user.profile.profilePhoto.url);
+      // console.log("Using profile photo URL:", user.profile.profilePhoto.url);
       return user.profile.profilePhoto.url;
     }
     
     // Fallback to a default avatar based on email
-    console.log("Using default avatar");
+    // console.log("Using default avatar");
     return `https://avatar.iran.liara.run/public/boy?username=${user?.email}`;
   };
 

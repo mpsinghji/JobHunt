@@ -4,8 +4,10 @@ import HeroSection from "./HeroSection.jsx";
 import CategoryCarousel from "./CategoryCarousel.jsx";
 import LatestJobs from "./LatestJobs.jsx";
 import Footer from "../shared/Footer.jsx";
+import useGetAllJobs from "../../hooks/useGetAllJobs.jsx";
 
 const Home = () => {
+  useGetAllJobs();
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />

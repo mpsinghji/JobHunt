@@ -35,7 +35,7 @@ const Login = () => {
       ...input,
       role: input.role === "jobseeker" ? "Jobseeker" : "Recruiter",
     };
-    console.log("Login attempt with data:", loginData);
+    // console.log("Login attempt with data:", loginData);
     try {
       const response = await axios.post(
         `${USER_API_END_POINT}/login`,
@@ -47,7 +47,7 @@ const Login = () => {
           withCredentials: true,
         }
       );
-      console.log("Login response:", response.data);
+      // console.log("Login response:", response.data);
       if (response.data.success) {
         dispatch(setUser(response.data.user));
         toast.success(response.data.message || "Login successful!");

@@ -140,11 +140,11 @@ export const logout = async (req, res) => {
 
 export const updateprofile = async (req, res) => {
     try {
-        console.log("Update profile request:", {
-            body: req.body,
-            files: req.files,
-            userId: req.id
-        });
+        // console.log("Update profile request:", {
+        //     body: req.body,
+        //     files: req.files,
+        //     userId: req.id
+        // });
 
         const user = await User.findById(req.id);
         if (!user) {

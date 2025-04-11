@@ -51,9 +51,9 @@ const Signup = () => {
       formData.append("profilePhoto", `https://avatar.iran.liara.run/public/boy?username=${input.email}`);
     }
 
-    for (let pair of formData.entries()) {
-      console.log('FormData:', pair[0], pair[1]);
-    }
+    // for (let pair of formData.entries()) {
+    //   console.log('FormData:', pair[0], pair[1]);
+    // }
 
     try {
       const res = await axios.post(`${USER_API_END_POINT}/register`, formData, {
