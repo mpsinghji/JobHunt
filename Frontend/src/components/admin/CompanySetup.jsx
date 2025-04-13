@@ -34,13 +34,18 @@ const CompanySetup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append("name", input.name);
-    formData.append("description", input.description);
-    formData.append("website", input.website);
-    formData.append("location", input.location);
+    
+    // Only append fields that have values
+    if (input.name) formData.append("name", input.name);
+    if (input.description) formData.append("description", input.description);
+    if (input.website) formData.append("website", input.website);
+    if (input.location) formData.append("location", input.location);
+    
+    // Handle file upload separately
     if (input.file) {
       formData.append("file", input.file);
     }
+
     try {
       setLoading(true);
       const response = await axios.put(
@@ -59,7 +64,7 @@ const CompanySetup = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }

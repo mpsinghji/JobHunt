@@ -2,57 +2,131 @@ import React from "react";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { Avatar, AvatarImage } from "../ui/avatar";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Edit2, MoreHorizontal } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { Card } from "../ui/card";
+import { Edit2, Trash2, Building2, Calendar } from "lucide-react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { formatDistanceToNow } from "date-fns";
 
 const CompanyTable = () => {
+  const { companies = [] } = useSelector((store) => store.company) || {};
+  const navigate = useNavigate();
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+  };
+
+  const getInitials = (name) => {
+    if (!name) return "CN";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
-    <div className="rounded-lg border bg-white shadow-sm">
-      <Table>
-        <TableCaption className="text-lg font-medium text-gray-500">
-          Registered Companies
-        </TableCaption>
-        <TableHeader>
-          <TableRow className="border-b-2 border-gray-100">
-            <TableHead className="w-[80px] font-semibold text-gray-600">Logo</TableHead>
-            <TableHead className="font-semibold text-gray-600">Company Name</TableHead>
-            <TableHead className="font-semibold text-gray-600">Date</TableHead>
-            <TableHead className="text-right font-semibold text-gray-600">Action</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow className="hover:bg-gray-50">
-            <TableCell>
-              <Avatar className="h-12 w-12 border-2 border-gray-100">
-                <AvatarImage src="/logo2.png" alt="Company Logo" className="object-cover" />
-              </Avatar>
-            </TableCell>
-            <TableCell className="font-medium text-gray-900">Company name</TableCell>
-            <TableCell className="text-gray-500">Date</TableCell>
-            <TableCell className="text-right">
-              <Popover>
-                <PopoverTrigger className="rounded-full p-2 hover:bg-gray-100">
-                  <MoreHorizontal className="h-5 w-5 text-gray-500" />
-                </PopoverTrigger>
-                <PopoverContent className="w-36 rounded-lg border border-gray-100 p-2 shadow-lg">
-                  <div className="flex items-center gap-2 rounded-md p-2 text-sm text-gray-700 hover:bg-gray-50">
-                    <Edit2 className="h-4 w-4" />
-                    <span>Edit</span>
+    <Card className="p-6">
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Your Companies</h2>
+          <p className="text-muted-foreground">
+            Manage and track your registered companies
+          </p>
+        </div>
+      </div>
+
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px]">Logo</TableHead>
+              <TableHead>Company Name</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {!companies || companies.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="h-24 text-center">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <Building2 className="h-8 w-8 text-muted-foreground" />
+                    <p className="text-muted-foreground">No companies registered yet</p>
+                    <Button variant="outline" onClick={() => navigate("/admin/company/setup")}>
+                      Add Your First Company
+                    </Button>
                   </div>
-                </PopoverContent>
-              </Popover>
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              companies.map((company) => (
+                <TableRow key={company._id} className="group">
+                  <TableCell>
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage
+                        src={company.logo}
+                        alt={company.name}
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {getInitials(company.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                  </TableCell>
+                  <TableCell>
+                    <div className="font-medium">{company.name}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {company.website || "No website"}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="capitalize">
+                      {company.status || "Active"}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar className="h-4 w-4" />
+                      {formatDate(company.createdAt)}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => navigate(`/admin/company/setup/${company._id}`)}
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </Card>
   );
 };
 

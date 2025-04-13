@@ -4,9 +4,12 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import CompanyTable from "./CompanyTable.jsx";
 import { useNavigate } from "react-router-dom";
+import useGetAllCompanies from "../../hooks/useGetAllCompanies";
 
 const Companies = () => {
     const navigate = useNavigate();
+    useGetAllCompanies();
+
   return (
     <>
       <Navbar />
