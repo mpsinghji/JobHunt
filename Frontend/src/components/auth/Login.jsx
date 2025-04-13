@@ -16,7 +16,7 @@ const Login = () => {
   const [input, setInput] = useState({
     email: "",
     password: "",
-    role: "",
+    role: "jobseeker",
   });
   const [showPassword, setShowPassword] = useState(false);
   const { loading } = useSelector((state) => state.auth);
@@ -133,13 +133,13 @@ const Login = () => {
                 <Label className="block text-sm font-medium text-gray-700 mb-2">
                   Role
                 </Label>
-                <RadioGroup className="flex items-center gap-6">
+                <RadioGroup defaultValue="jobseeker" className="flex items-center gap-6">
                   <div className="flex items-center space-x-2">
                     <Input
                       type="radio"
                       name="role"
                       value="jobseeker"
-                      checked={input.role === "jobseeker"}
+                      defaultChecked
                       onChange={changeEventHandler}
                       className="h-4 w-4 text-blue-600 cursor-pointer"
                       required
@@ -151,7 +151,6 @@ const Login = () => {
                       type="radio"
                       name="role"
                       value="recruiter"
-                      checked={input.role === "recruiter"}
                       onChange={changeEventHandler}
                       className="h-4 w-4 text-blue-600 cursor-pointer"
                       required

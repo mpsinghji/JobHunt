@@ -7,7 +7,6 @@ import { useNavigate } from "react-router-dom";
 const JobCard = ({ job }) => {
   const navigate = useNavigate();
 
-  // Format salary to Indian format with ₹ symbol
   const formatSalary = (salary) => {
     if (!salary) return "Not specified";
     return new Intl.NumberFormat("en-IN", {

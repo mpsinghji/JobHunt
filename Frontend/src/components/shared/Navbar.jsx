@@ -64,10 +64,10 @@ const Navbar = () => {
               {user && user?.role === "Recruiter" ? (
                 <>
                   <li>
-                    <Link to="/admin/companies">Home</Link>
+                    <Link to="/admin/companies">Companies</Link>
                   </li>
                   <li>
-                    <Link to="/admin/jobs">Browse Jobs Openings</Link>
+                    <Link to="/admin/jobs">Jobs</Link>
                   </li>
                 </>
               ) : (
@@ -139,14 +139,6 @@ const Navbar = () => {
                   {user && user?.role === "Recruiter" ? (
                     <>
                       <div className="flex flex-col my-2 text-gray-600">
-                        <div className="flex w-fit items-center gap-2 cursor-pointer">
-                          <Building2 className="w-4 h-4" />
-                          <Button variant="link">Register Company</Button>
-                        </div>
-                        <div className="flex w-fit items-center gap-2 cursor-pointer">
-                          <Briefcase className="w-4 h-4" />
-                          <Button variant="link">Create a Job Post</Button>
-                        </div>
                         <div className="flex w-fit items-center gap-2 cursor-pointer">
                           <LogOutIcon className="w-4 h-4" />
                           <Button variant="link" onClick={handleLogout}>
