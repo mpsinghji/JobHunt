@@ -165,7 +165,15 @@ const CompanySetup = () => {
                             className="cursor-pointer"
                           >
                             <div className="flex flex-col items-center gap-2">
-                              <Upload className="w-6 h-6 text-gray-400" />
+                              {singleCompany?.logo ? (
+                                <img
+                                  src={singleCompany.logo}
+                                  alt="Company logo"
+                                  className="w-16 h-16 object-cover rounded-lg"
+                                />
+                              ) : (
+                                <Upload className="w-6 h-6 text-gray-400" />
+                              )}
                               <span className="text-sm text-gray-600">
                                 {input.file
                                   ? input.file.name

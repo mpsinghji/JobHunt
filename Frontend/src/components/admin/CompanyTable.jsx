@@ -12,7 +12,6 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Card } from "../ui/card";
 import { Edit2, Trash2, Building2, Calendar } from "lucide-react";
-import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import useDeleteCompany from "../../hooks/useDeleteCompany";
@@ -28,8 +27,7 @@ import {
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
 
-const CompanyTable = () => {
-  const { companies = [] } = useSelector((store) => store.company) || {};
+const CompanyTable = ({ companies = [] }) => {
   const navigate = useNavigate();
   const deleteCompany = useDeleteCompany();
   const [companyToDelete, setCompanyToDelete] = useState(null);
@@ -89,7 +87,7 @@ const CompanyTable = () => {
                     </p>
                     <Button
                       variant="outline"
-                      onClick={() => navigate("/admin/company/setup")}
+                      onClick={() => navigate("/admin/companies/create")}
                     >
                       Add Your First Company
                     </Button>

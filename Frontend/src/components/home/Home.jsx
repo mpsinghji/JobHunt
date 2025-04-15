@@ -33,7 +33,7 @@ const Home = () => {
             </section>
           </div>
         </div>
-      </main>
+      </main> 
       <Footer />
     </div>
   );
