@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -15,10 +15,24 @@ import { Edit2, Trash2, Building2, Calendar } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
+import useDeleteCompany from "../../hooks/useDeleteCompany";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
 
 const CompanyTable = () => {
   const { companies = [] } = useSelector((store) => store.company) || {};
   const navigate = useNavigate();
+  const deleteCompany = useDeleteCompany();
+  const [companyToDelete, setCompanyToDelete] = useState(null);
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -33,6 +47,13 @@ const CompanyTable = () => {
       .join("")
       .toUpperCase()
       .slice(0, 2);
+  };
+
+  const handleDelete = async () => {
+    if (companyToDelete) {
+      await deleteCompany(companyToDelete);
+      setCompanyToDelete(null);
+    }
   };
 
   return (
@@ -63,8 +84,13 @@ const CompanyTable = () => {
                 <TableCell colSpan={5} className="h-24 text-center">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <Building2 className="h-8 w-8 text-muted-foreground" />
-                    <p className="text-muted-foreground">No companies registered yet</p>
-                    <Button variant="outline" onClick={() => navigate("/admin/company/setup")}>
+                    <p className="text-muted-foreground">
+                      No companies registered yet
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate("/admin/company/setup")}
+                    >
                       Add Your First Company
                     </Button>
                   </div>
@@ -107,17 +133,42 @@ const CompanyTable = () => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => navigate(`/admin/company/setup/${company._id}`)}
+                        onClick={() =>
+                          navigate(`/admin/companies/${company._id}`)
+                        }
                       >
                         <Edit2 className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => setCompanyToDelete(company._id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently
+                              delete the company and all its associated data.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={handleDelete}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </TableCell>
                 </TableRow>

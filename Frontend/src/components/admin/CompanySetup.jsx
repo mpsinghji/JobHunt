@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useNavigate, useParams } from "react-router-dom";
 import { COMPANY_API_END_POINT } from "../utils/constants";
 import { useSelector } from "react-redux";
+import useGetSingleCompany from "../../hooks/useGetSingleCompany";
 
 const CompanySetup = () => {
   const [loading, setLoading] = useState(false);
@@ -23,6 +24,8 @@ const CompanySetup = () => {
     file: null,
   });
 
+  useGetSingleCompany(params.id);
+
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };
@@ -35,13 +38,11 @@ const CompanySetup = () => {
     e.preventDefault();
     const formData = new FormData();
     
-    // Only append fields that have values
     if (input.name) formData.append("name", input.name);
     if (input.description) formData.append("description", input.description);
     if (input.website) formData.append("website", input.website);
     if (input.location) formData.append("location", input.location);
     
-    // Handle file upload separately
     if (input.file) {
       formData.append("file", input.file);
     }
@@ -69,37 +70,44 @@ const CompanySetup = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
-    setInput({
-      name: singleCompany.name,
-      description: singleCompany.description,
-      website: singleCompany.website,
-      location: singleCompany.location,
-      file: singleCompany.file,
-    });
+    if (singleCompany) {
+      setInput({
+        name: singleCompany.name || "",
+        description: singleCompany.description || "",
+        website: singleCompany.website || "",
+        location: singleCompany.location || "",
+        file: null,
+      });
+    }
   }, [singleCompany]);
+
   return (
     <>
       <Navbar />
       <div className="min-h-screen bg-gray-50">
-        <form onSubmit={handleSubmit}>
-          <div className="max-w-3xl mx-auto px-4 py-8">
-            <Button
-              variant="outline"
-              className="flex items-center gap-2 text-gray-500 font-semibold mb-6"
-              onClick={() => navigate("/admin/companies")}
-            >
-              <ArrowLeft />
-              <span>Back</span>
-            </Button>
+        <div className="max-w-3xl mx-auto px-4 py-8">
+          <Button
+            variant="outline"
+            className="flex items-center gap-2 text-gray-500 font-semibold mb-6"
+            onClick={() => navigate("/admin/companies")}
+            type="button"
+          >
+            <ArrowLeft />
+            <span>Back</span>
+          </Button>
 
+          <form onSubmit={handleSubmit}>
             <div className="space-y-6">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                  Company Setup
+                  {singleCompany ? "Edit Company" : "Company Setup"}
                 </h1>
                 <p className="text-gray-600">
-                  Fill in your company details to get started
+                  {singleCompany
+                    ? "Update your company details"
+                    : "Fill in your company details to get started"}
                 </p>
               </div>
 
@@ -115,6 +123,7 @@ const CompanySetup = () => {
                       placeholder="Enter company name"
                       value={input.name}
                       onChange={changeEventHandler}
+                      required
                     />
                   </div>
 
@@ -202,14 +211,14 @@ const CompanySetup = () => {
                       type="submit"
                       className="bg-blue-600 hover:bg-blue-700 text-white"
                     >
-                      Save Company Details
+                      {singleCompany ? "Update Company" : "Save Company Details"}
                     </Button>
                   </div>
                 )}
               </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </>
   );
