@@ -23,13 +23,22 @@ const Jobs = () => {
 
     const query = searchQuery.toLowerCase();
     const filtered = allJobs.filter((job) => {
+      const jobTitle = job.title?.toLowerCase() || "";
+      const companyName = job.companyId?.name?.toLowerCase() || "";
+      const location = job.location?.toLowerCase() || "";
+      const jobType = job.jobType?.toLowerCase() || "";
+      const experience = job.experience?.toLowerCase() || "";
+      const requirements = job.requirements?.join(" ").toLowerCase() || "";
+      const description = job.description?.toLowerCase() || "";
+
       return (
-        job.title?.toLowerCase().includes(query) ||
-        job.company?.name?.toLowerCase().includes(query) ||
-        job.location?.toLowerCase().includes(query) ||
-        job.position?.toLowerCase().includes(query) ||
-        job.jobType?.toLowerCase().includes(query) ||
-        job.requirements?.some((req) => req.toLowerCase().includes(query))
+        jobTitle.includes(query) ||
+        companyName.includes(query) ||
+        location.includes(query) ||
+        jobType.includes(query) ||
+        experience.includes(query) ||
+        requirements.includes(query) ||
+        description.includes(query)
       );
     });
     setFilteredJobs(filtered);
@@ -46,7 +55,7 @@ const Jobs = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <Input
                 type="text"
-                placeholder="Search jobs by title, company, location..."
+                placeholder="Search jobs by title, company, location, type, experience..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 w-full bg-gray-50 border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"

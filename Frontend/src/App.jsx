@@ -42,7 +42,6 @@ const App = () => {
           {/* withdraw application */}
           {/* delete saved jobs */}
           {/* browser by category */}
-          {/* Building Admin Job  Page */}
           {/* Implement Applicant Page */}
           {/* Implement Update Status of Applicant */}
           {/* Fetching Get All Applied Jobs */}
