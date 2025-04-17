@@ -157,19 +157,3 @@ export const deleteCompany = async (req, res) => {
     return res.status(500).json({ message: error.message, success: false });
   }
 };
-
-export const getAdminCompanies = async (req, res) => {
-  try {
-    const adminId = req.id;
-    const companies = await Company.find({ userId: adminId });
-    if (!companies) {
-      return res
-        .status(404)
-        .json({ message: "No companies found", success: false });
-    }
-    return res.status(200).json({ companies, success: true });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: error.message, success: false });
-  }
-};

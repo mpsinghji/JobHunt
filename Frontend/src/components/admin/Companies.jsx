@@ -4,29 +4,30 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import CompanyTable from "./CompanyTable.jsx";
 import { useNavigate } from "react-router-dom";
-import useGetCompanies from "../../hooks/useGetCompanies";
+import useGetAllCompanies from "../../hooks/useGetAllCompanies";
 import { useDispatch, useSelector } from "react-redux";
 import { setSearchCompanyByText } from "../../redux/companySlice";
 
 const Companies = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { allCompanies = [], searchCompanyByText } = useSelector((state) => state.company);
-  const [filteredCompanies, setFilteredCompanies] = useState(allCompanies);
-  const { isLoading, error } = useGetCompanies();
+  const { companies = [], searchCompanyByText } = useSelector((state) => state.company);
+  const [filteredCompanies, setFilteredCompanies] = useState(companies);
+
+  useGetAllCompanies();
 
   // Filter companies when search text or companies list changes
   React.useEffect(() => {
     if (!searchCompanyByText) {
-      setFilteredCompanies(allCompanies);
+      setFilteredCompanies(companies);
       return;
     }
 
-    const filtered = allCompanies.filter((company) =>
+    const filtered = companies.filter((company) =>
       company?.name?.toLowerCase().includes(searchCompanyByText.toLowerCase())
     );
     setFilteredCompanies(filtered);
-  }, [searchCompanyByText, allCompanies]);
+  }, [searchCompanyByText, companies]);
 
   const handleSearchChange = (e) => {
     dispatch(setSearchCompanyByText(e.target.value));
@@ -47,13 +48,7 @@ const Companies = () => {
             New Company
           </Button>
         </div>
-        {isLoading ? (
-          <div className="text-center py-8">Loading companies...</div>
-        ) : error ? (
-          <div className="text-center py-8 text-red-500">{error}</div>
-        ) : (
-          <CompanyTable companies={filteredCompanies} />
-        )}
+        <CompanyTable companies={filteredCompanies} />
       </div>
     </>
   );

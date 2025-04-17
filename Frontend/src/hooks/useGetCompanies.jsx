@@ -6,41 +6,32 @@ import { COMPANY_API_END_POINT } from "../utils/constants";
 import { toast } from "sonner";
 
 const useGetCompanies = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
+  const { allCompanies } = useSelector((state) => state.company);
 
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        setIsLoading(true);
-        setError(null);
         const res = await axios.get(
-          `${COMPANY_API_END_POINT}/getadmincompanies`,
+          `${COMPANY_API_END_POINT}/get`,
           {
-            withCredentials: true
+            withCredentials: true,
           }
         );
-
         if (res.data.success) {
           dispatch(setAllCompanies(res.data.companies));
         }
       } catch (error) {
         console.error("Error fetching companies:", error);
-        setError(error.response?.data?.message || "Failed to fetch companies");
-        toast.error(error.response?.data?.message || "Failed to fetch companies");
-      } finally {
-        setIsLoading(false);
       }
     };
 
-    if (user?._id) {
+    if (!allCompanies || allCompanies.length === 0) {
       fetchCompanies();
     }
-  }, [dispatch, user?._id]);
+  }, [dispatch, allCompanies]);
 
-  return { isLoading, error };
+  return { allCompanies };
 };
 
 export default useGetCompanies; 
