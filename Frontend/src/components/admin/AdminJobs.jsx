@@ -12,7 +12,7 @@ const AdminJobs = () => {
   const { allJobs = [] } = useSelector((state) => state.job);
   const { isLoading, error } = useGetJobs();
 
-  console.log("Current jobs in state:", allJobs);
+  // console.log("Current jobs in state:", allJobs);
 
   return (
     <>

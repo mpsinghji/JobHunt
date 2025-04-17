@@ -70,11 +70,11 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
   const fileChangeHandler = (e, type) => {
     const file = e.target.files[0];
     if (file) {
-      console.log(`Selected ${type}:`, {
-        name: file.name,
-        type: file.type,
-        size: file.size
-      });
+      // console.log(`Selected ${type}:`, {
+      //   name: file.name,
+      //   type: file.type,
+      //   size: file.size
+      // });
       setSelectedFiles(prev => ({
         ...prev,
         [type]: file
@@ -128,9 +128,9 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
       }
 
       // Log form data for debugging
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
-      }
+      // for (let [key, value] of formData.entries()) {
+      //   console.log(`${key}:`, value);
+      // }
 
       const response = await axios.post(
         `${USER_API_END_POINT}/profile/update`,

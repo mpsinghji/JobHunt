@@ -60,9 +60,14 @@ const AdminJobSetup = () => {
     e.preventDefault();
     try {
       setLoading(true);
+      const jobData = {
+        ...formData,
+        requirements: formData.requirements.split(',').map(req => req.trim())
+      };
+
       const response = await axios.put(
         `${JOB_API_END_POINT}/update/${params.id}`,
-        formData,
+        jobData,
         {
           headers: {
             "Content-Type": "application/json",

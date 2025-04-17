@@ -5,7 +5,7 @@ import Navbar from "../shared/Navbar";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useEffect } from "react";
-import { JOB_API_END_POINT } from "../../utils/constants";
+import { JOB_API_END_POINT,APPLICATION_API_END_POINT } from "../../utils/constants";
 import { setSingleJob } from "@/redux/jobSlice.js";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
@@ -143,7 +143,7 @@ const JobDescription = () => {
           <h1 className="font-bold my-1">
             Experience:{" "}
             <span className="pl-4 font-normal text-gray-800">
-              {singleJob?.experience} yrs
+              {singleJob?.experience}
             </span>
           </h1>
           <h1 className="font-bold my-1">

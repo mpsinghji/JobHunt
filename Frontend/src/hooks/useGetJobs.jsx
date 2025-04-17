@@ -24,7 +24,7 @@ const useGetJobs = (jobId = null) => {
         });
 
         const data = await res.json();
-        console.log("Jobs API Response:", data);
+        // console.log("Jobs API Response:", data);
 
         if (data.success === false) {
           throw new Error(data.message);
@@ -35,7 +35,7 @@ const useGetJobs = (jobId = null) => {
         } else {
           dispatch(setAllJobs(data.jobs));
         }
-        console.log("Fetched jobs:", data.jobs);
+        // console.log("Fetched jobs:", data.jobs);
       } catch (error) {
         console.error("Error fetching jobs:", error);
         toast.error(error.message || "Failed to fetch jobs");

@@ -39,9 +39,14 @@ const AdminJobCreate = () => {
 
   const createJob = async () => {
     try {
+      const jobData = {
+        ...formData,
+        requirements: formData.requirements.split(',').map(req => req.trim())
+      };
+
       const res = await axios.post(
         `${JOB_API_END_POINT}/post`,
-        formData,
+        jobData,
         {
           headers: {
             "Content-Type": "application/json",

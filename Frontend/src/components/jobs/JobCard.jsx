@@ -47,12 +47,12 @@ const JobCard = ({ job }) => {
                 {job?.jobType || "Job Type"}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-gray-600">
+            {/* <div className="flex items-center gap-2 text-gray-600">
               <UserCircle className="h-4 w-4 text-gray-500" />
               <span className="text-sm font-medium">
                 {job?.position || "Position"}
               </span>
-            </div>
+            </div> */}
           </div>
           <div className="flex flex-col items-end">
             <div className="flex items-center gap-1 text-gray-500 text-xs bg-gray-50 px-2 py-1 rounded-full">
@@ -72,7 +72,7 @@ const JobCard = ({ job }) => {
           <div className="flex items-center gap-2 text-gray-600">
             <Briefcase className="h-4 w-4 text-gray-500" />
             <span className="text-sm font-medium">
-              {job?.experience || "0"} years experience
+              {job?.experience} experience
             </span>
           </div>
         </div>
