@@ -103,11 +103,11 @@ const AdminJobsTable = ({ jobs = [] }) => {
               jobs.map((job) => (
                 <TableRow key={job._id} className="group">
                   <TableCell>
-                    <Avatar className="h-10 w-10">
+                    <Avatar className="h-12 w-12 rounded-none">
                       <AvatarImage
                         src={job.companyId?.logo}
                         alt={job.companyId?.name}
-                        className="object-cover"
+                        className="object-contain w-full h-full"
                       />
                       <AvatarFallback className="bg-primary/10 text-primary">
                         {getInitials(job.companyId?.name)}

@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { setUser } from '../../redux/authSlice'
 import UpdateProfileDialog from './UpdateProfileDialog'
 import axios from 'axios'
-import { USER_API_END_POINT } from '../utils/constants'
+import { USER_API_END_POINT } from '../../utils/constants'
 import { toast } from 'sonner'
 import {
   AlertDialog,

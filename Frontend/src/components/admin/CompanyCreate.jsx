@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setSingleCompany } from "../../redux/companySlice";
-import { COMPANY_API_END_POINT } from "../utils/constants";
+import { COMPANY_API_END_POINT } from "../../utils/constants";
 
 const CompanyCreate = () => {
   const navigate = useNavigate();

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import axios from "axios";
-import { APPLICATION_API_END_POINT } from "../utils/constants";
+import { APPLICATION_API_END_POINT } from "../../utils/constants";
 import { toast } from "sonner";
 import { Building2, Briefcase, Calendar, Clock } from "lucide-react";
 import Saved from "./Saved";

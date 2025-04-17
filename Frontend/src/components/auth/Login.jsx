@@ -6,7 +6,7 @@ import { Button } from "../ui/button";
 import { RadioGroup } from "../ui/radio-group";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { USER_API_END_POINT } from "../utils/constants";
+import { USER_API_END_POINT } from "../../utils/constants";
 import axios from "axios";
 import { toast } from "sonner";
 import { Eye, EyeOff, Loader2 } from "lucide-react";

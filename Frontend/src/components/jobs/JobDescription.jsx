@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import {
   APPLICATION_API_END_POINT,
   JOB_API_END_POINT,
-} from "../../components/utils/constants.js";
+} from "../../utils/constants.js";
 import { setSingleJob } from "@/redux/jobSlice.js";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";

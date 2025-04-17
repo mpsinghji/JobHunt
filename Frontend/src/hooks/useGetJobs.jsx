@@ -1,57 +1,53 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
-import { JOB_API_END_POINT } from "../components/utils/constants";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { JOB_API_END_POINT } from "../utils/constants";
 import { setAllJobs, setSingleJob } from "../redux/jobSlice";
+import { toast } from "sonner";
 
 const useGetJobs = (jobId = null) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const fetchJobs = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
-        setError(null);
-        
-        if (jobId) {
-          // Fetch single job
-          const response = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`, {
-            withCredentials: true,
-          });
-          if (response.data.success) {
-            dispatch(setSingleJob(response.data.job));
-          }
-        } else {
-          // Fetch all jobs for the current user
-          const response = await axios.get(`${JOB_API_END_POINT}/getadminjobs`, {
-            withCredentials: true,
-          });
-          
-          console.log("Jobs API Response:", response.data);
-          
-          if (response.data.success) {
-            const jobs = response.data.jobs || [];
-            console.log("Fetched jobs:", jobs);
-            dispatch(setAllJobs(jobs));
-          }
+        const endpoint = jobId
+          ? `${JOB_API_END_POINT}/get/${jobId}`
+          : `${JOB_API_END_POINT}/getadminjobs`;
+
+        const res = await fetch(endpoint, {
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await res.json();
+        console.log("Jobs API Response:", data);
+
+        if (data.success === false) {
+          throw new Error(data.message);
         }
+
+        if (jobId) {
+          dispatch(setSingleJob(data.job));
+        } else {
+          dispatch(setAllJobs(data.jobs));
+        }
+        console.log("Fetched jobs:", data.jobs);
       } catch (error) {
         console.error("Error fetching jobs:", error);
-        setError(error.response?.data?.message || "Failed to fetch jobs");
+        toast.error(error.message || "Failed to fetch jobs");
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (user?._id) {
-      fetchJobs();
-    }
-  }, [jobId, dispatch, user?._id]);
+    fetchJobs();
+  }, [jobId, dispatch]);
 
-  return { isLoading, error };
+  return { isLoading };
 };
 
 export default useGetJobs;

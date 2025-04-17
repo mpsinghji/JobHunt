@@ -98,11 +98,11 @@ const CompanyTable = ({ companies = [] }) => {
               companies.map((company) => (
                 <TableRow key={company._id} className="group">
                   <TableCell>
-                    <Avatar className="h-10 w-10">
+                    <Avatar className="h-12 w-12 rounded-none">
                       <AvatarImage
                         src={company.logo}
                         alt={company.name}
-                        className="object-cover"
+                        className="object-contain w-full h-full"
                       />
                       <AvatarFallback className="bg-primary/10 text-primary">
                         {getInitials(company.name)}

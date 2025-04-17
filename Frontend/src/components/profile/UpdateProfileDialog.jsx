@@ -11,7 +11,7 @@ import { Label } from "../ui/label";
 import { Loader2, Mail, Phone, MapPin, Link as LinkIcon, User, Calendar, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { useSelector } from "react-redux";
-import { USER_API_END_POINT } from "./../utils/constants";
+import { USER_API_END_POINT } from "../../utils/constants";
 import axios from "axios";
 import { toast } from "sonner";
 import { setUser } from "../../redux/authSlice";

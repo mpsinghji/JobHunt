@@ -10,6 +10,7 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { JOB_API_END_POINT } from "../utils/constants";
 import { Textarea } from "../ui/textarea";
+import { IndianRupee } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import useGetCompanies from "../../hooks/useGetCompanies";
 
@@ -19,10 +20,11 @@ const AdminJobCreate = () => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    requirements: [],
+    requirements: "",
     location: "",
     salary: "",
     jobType: "",
+    position: "",
     companyId: "",
     experience: "",
   });
@@ -37,16 +39,9 @@ const AdminJobCreate = () => {
 
   const createJob = async () => {
     try {
-      // Convert requirements string to array
-      const jobData = {
-        ...formData,
-        requirements: formData.requirements.split(",").map(req => req.trim()),
-        salary: parseFloat(formData.salary.replace(/[^0-9.-]+/g, "")), // Remove currency symbol and convert to number
-      };
-
       const res = await axios.post(
         `${JOB_API_END_POINT}/post`,
-        jobData,
+        formData,
         {
           headers: {
             "Content-Type": "application/json",
@@ -115,7 +110,7 @@ const AdminJobCreate = () => {
                         </SelectItem>
                       ))
                     ) : (
-                      <SelectItem value="" disabled>
+                      <SelectItem value="no-companies" disabled>
                         No companies available
                       </SelectItem>
                     )}
@@ -136,13 +131,13 @@ const AdminJobCreate = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="salary">Salary (in INR)</Label>
+                <Label htmlFor="salary">Salary</Label>
                 <Input
                   id="salary"
                   name="salary"
                   value={formData.salary}
                   onChange={handleChange}
-                  placeholder="₹2,00,000"
+                  placeholder={<IndianRupee /> + "2 Lacs"}
                   required
                 />
               </div>
@@ -166,16 +161,20 @@ const AdminJobCreate = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="experience">Experience (in years)</Label>
-                <Input
-                  id="experience"
-                  name="experience"
-                  type="number"
+                <Label htmlFor="experience">Experience Level</Label>
+                <Select
                   value={formData.experience}
-                  onChange={handleChange}
-                  placeholder="e.g., 3"
-                  required
-                />
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, experience: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select experience level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Entry Level">Entry Level</SelectItem>
+                    <SelectItem value="Mid Level">Mid Level</SelectItem>
+                    <SelectItem value="Senior Level">Senior Level</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
