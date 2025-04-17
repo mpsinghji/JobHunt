@@ -7,7 +7,7 @@ import { Textarea } from "../ui/textarea";
 import axios from "axios";
 import { toast } from "sonner";
 import { useNavigate, useParams } from "react-router-dom";
-import { COMPANY_API_END_POINT } from "../utils/constants";
+import { COMPANY_API_END_POINT } from "../../utils/constants";
 import { useSelector } from "react-redux";
 import useGetSingleCompany from "../../hooks/useGetSingleCompany";
 

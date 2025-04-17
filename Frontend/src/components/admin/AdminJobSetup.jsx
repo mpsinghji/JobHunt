@@ -7,7 +7,7 @@ import { Textarea } from "../ui/textarea";
 import axios from "axios";
 import { toast } from "sonner";
 import { useNavigate, useParams } from "react-router-dom";
-import { JOB_API_END_POINT } from "../utils/constants";
+import { JOB_API_END_POINT } from "../../utils/constants";
 import { useSelector } from "react-redux";
 import useGetJobs from "../../hooks/useGetJobs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";

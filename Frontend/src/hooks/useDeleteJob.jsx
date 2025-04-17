@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { JOB_API_END_POINT } from "../components/utils/constants";
+import { JOB_API_END_POINT } from "../utils/constants";
 import { setAllJobs } from "../redux/jobSlice";
 import { toast } from "sonner";
 

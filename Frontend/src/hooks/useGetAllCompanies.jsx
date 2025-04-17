@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { setCompanies } from "../redux/companySlice";
+import { COMPANY_API_END_POINT } from "../utils/constants";
+import { setAllCompanies } from "../redux/companySlice";
+import { toast } from "sonner";
 import axios from "axios";
-import { COMPANY_API_END_POINT } from "../components/utils/constants";
 
 const useGetAllCompanies = () => {
   const dispatch = useDispatch();
@@ -14,7 +15,7 @@ const useGetAllCompanies = () => {
           withCredentials: true,
         });
         if (res.data.success) {
-          dispatch(setCompanies(res.data.companies));
+          dispatch(setAllCompanies(res.data.companies));
         }
       } catch (error) {
         console.error("Error fetching companies:", error);

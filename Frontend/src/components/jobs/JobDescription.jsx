@@ -5,13 +5,12 @@ import Navbar from "../shared/Navbar";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useEffect } from "react";
-import {
-  APPLICATION_API_END_POINT,
-  JOB_API_END_POINT,
-} from "../../utils/constants.js";
+import { JOB_API_END_POINT } from "../../utils/constants";
 import { setSingleJob } from "@/redux/jobSlice.js";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
+import { Textarea } from "../ui/textarea";
+import { Label } from "../ui/label";
 
 const JobDescription = () => {
   const params = useParams();

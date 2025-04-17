@@ -7,7 +7,7 @@ import { RadioGroup } from "../ui/radio-group";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
-import { USER_API_END_POINT } from "../utils/constants";
+import { USER_API_END_POINT } from "../../utils/constants";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading } from "../../redux/authSlice";

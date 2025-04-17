@@ -1,8 +1,9 @@
-import axios from "axios";
-import { COMPANY_API_END_POINT } from "../components/utils/constants";
-import { toast } from "sonner";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { setCompanies } from "../redux/companySlice";
+import { COMPANY_API_END_POINT } from "../utils/constants";
+import { setAllCompanies } from "../redux/companySlice";
+import { toast } from "sonner";
+import axios from "axios";
 
 const useDeleteCompany = () => {
   const dispatch = useDispatch();
@@ -20,7 +21,7 @@ const useDeleteCompany = () => {
         });
         
         if (updatedCompanies.data.success) {
-          dispatch(setCompanies(updatedCompanies.data.companies));
+          dispatch(setAllCompanies(updatedCompanies.data.companies));
           toast.success("Company deleted successfully");
         }
       }

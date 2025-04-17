@@ -8,7 +8,7 @@ import { Briefcase } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { JOB_API_END_POINT } from "../utils/constants";
+import { JOB_API_END_POINT } from "../../utils/constants";
 import { Textarea } from "../ui/textarea";
 import { IndianRupee } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
@@ -110,7 +110,7 @@ const AdminJobCreate = () => {
                         </SelectItem>
                       ))
                     ) : (
-                      <SelectItem value="no-companies" disabled>
+                      <SelectItem value="" disabled>
                         No companies available
                       </SelectItem>
                     )}
@@ -131,13 +131,13 @@ const AdminJobCreate = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="salary">Salary</Label>
+                <Label htmlFor="salary">Salary (in INR)</Label>
                 <Input
                   id="salary"
                   name="salary"
                   value={formData.salary}
                   onChange={handleChange}
-                  placeholder={<IndianRupee /> + "2 Lacs"}
+                  placeholder="₹2,00,000"
                   required
                 />
               </div>
