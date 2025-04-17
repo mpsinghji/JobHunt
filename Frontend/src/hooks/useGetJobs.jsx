@@ -1,53 +1,49 @@
 import { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { setAllJobs } from "../redux/jobSlice";
 import { JOB_API_END_POINT } from "../utils/constants";
-import { setAllJobs, setSingleJob } from "../redux/jobSlice";
+import axios from "axios";
 import { toast } from "sonner";
 
-const useGetJobs = (jobId = null) => {
+const useGetJobs = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const fetchJobs = async () => {
-      setIsLoading(true);
       try {
-        const endpoint = jobId
-          ? `${JOB_API_END_POINT}/get/${jobId}`
-          : `${JOB_API_END_POINT}/getadminjobs`;
+        setIsLoading(true);
+        setError(null);
+        const res = await axios.get(
+          `${JOB_API_END_POINT}/getadminjobs`,
+          {
+            withCredentials: true,
+            params: {
+              userId: user?._id
+            }
+          }
+        );
 
-        const res = await fetch(endpoint, {
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        const data = await res.json();
-        // console.log("Jobs API Response:", data);
-
-        if (data.success === false) {
-          throw new Error(data.message);
+        if (res.data.success) {
+          dispatch(setAllJobs(res.data.jobs));
         }
-
-        if (jobId) {
-          dispatch(setSingleJob(data.job));
-        } else {
-          dispatch(setAllJobs(data.jobs));
-        }
-        // console.log("Fetched jobs:", data.jobs);
       } catch (error) {
         console.error("Error fetching jobs:", error);
-        toast.error(error.message || "Failed to fetch jobs");
+        setError(error.response?.data?.message || "Failed to fetch jobs");
+        toast.error(error.response?.data?.message || "Failed to fetch jobs");
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchJobs();
-  }, [jobId, dispatch]);
+    if (user?._id) {
+      fetchJobs();
+    }
+  }, [dispatch, user?._id]);
 
-  return { isLoading };
+  return { isLoading, error };
 };
 
 export default useGetJobs;
