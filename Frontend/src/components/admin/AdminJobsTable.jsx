@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
-import useDeleteJob  from "../../hooks/useDeleteJob";
+import useDeleteJob from "../../hooks/useDeleteJob";
 import { toast } from "sonner";
 
 const AdminJobsTable = ({ jobs = [] }) => {
@@ -50,7 +50,11 @@ const AdminJobsTable = ({ jobs = [] }) => {
 
   const handleDelete = async () => {
     if (jobToDelete) {
-      await deleteJob(jobToDelete);
+      try {
+        await deleteJob(jobToDelete);
+      } catch (error) {
+        // Error is already handled in the hook
+      }
       setJobToDelete(null);
     }
   };
@@ -73,7 +77,6 @@ const AdminJobsTable = ({ jobs = [] }) => {
               <TableHead className="w-[100px]">Logo</TableHead>
               <TableHead>Job Title</TableHead>
               <TableHead>Company</TableHead>
-              <TableHead>Status</TableHead>
               <TableHead>Created</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -81,7 +84,7 @@ const AdminJobsTable = ({ jobs = [] }) => {
           <TableBody>
             {!jobs || jobs.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
+                <TableCell colSpan={5} className="h-24 text-center">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <Briefcase className="h-8 w-8 text-muted-foreground" />
                     <p className="text-muted-foreground">
@@ -102,12 +105,12 @@ const AdminJobsTable = ({ jobs = [] }) => {
                   <TableCell>
                     <Avatar className="h-10 w-10">
                       <AvatarImage
-                        src={job.company?.logo}
-                        alt={job.company?.name}
+                        src={job.companyId?.logo}
+                        alt={job.companyId?.name}
                         className="object-cover"
                       />
                       <AvatarFallback className="bg-primary/10 text-primary">
-                        {getInitials(job.company?.name)}
+                        {getInitials(job.companyId?.name)}
                       </AvatarFallback>
                     </Avatar>
                   </TableCell>
@@ -118,15 +121,10 @@ const AdminJobsTable = ({ jobs = [] }) => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="font-medium">{job.company?.name}</div>
+                    <div className="font-medium">{job.companyId?.name}</div>
                     <div className="text-sm text-muted-foreground">
-                      {job.company?.website || "No website"}
+                      {job.companyId?.website || "No website"}
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={job.status === "active" ? "default" : "outline"} className="capitalize">
-                      {job.status || "Draft"}
-                    </Badge>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
