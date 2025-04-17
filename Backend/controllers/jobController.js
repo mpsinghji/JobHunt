@@ -9,7 +9,6 @@ export const postJob = async (req, res) => {
       location,
       salary,
       jobType,
-      position,
       companyId,
       experience,
     } = req.body;
@@ -19,7 +18,6 @@ export const postJob = async (req, res) => {
     if (
       !title ||
       !description ||
-      !position ||
       !companyId ||
       !experience ||
       !location ||
@@ -30,7 +28,6 @@ export const postJob = async (req, res) => {
       const missingFields = [];
       if (!title) missingFields.push("title");
       if (!description) missingFields.push("description");
-      if (!position) missingFields.push("position");
       if (!companyId) missingFields.push("company");
       if (!experience) missingFields.push("experience");
       if (!location) missingFields.push("location");
@@ -49,12 +46,11 @@ export const postJob = async (req, res) => {
     const job = await Job.create({
       title,
       description,
-      requirements: requirements.split(",").map((req) => req.trim()),
+      requirements: Array.isArray(requirements) ? requirements : requirements.split(",").map((req) => req.trim()),
       location,
       experience,
       salary,
       jobType,
-      position,
       companyId,
       created_by,
     });

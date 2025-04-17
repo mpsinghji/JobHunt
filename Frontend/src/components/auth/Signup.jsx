@@ -51,10 +51,6 @@ const Signup = () => {
       formData.append("profilePhoto", `https://avatar.iran.liara.run/public/boy?username=${input.email}`);
     }
 
-    for (let pair of formData.entries()) {
-      console.log('FormData:', pair[0], pair[1]);
-    }
-
     try {
       const res = await axios.post(`${USER_API_END_POINT}/register`, formData, {
         headers: {
@@ -72,8 +68,11 @@ const Signup = () => {
       }
     } catch (error) {
       console.error("Registration error:", error);
-      const errorMessage = error.response?.data?.message || "Registration failed. Please try again.";
-      toast.error(errorMessage);
+      if (error.response?.status === 400 && error.response?.data?.message === "Email already exists") {
+        toast.error("Email already exists. Please use a different email address.");
+      } else {
+        toast.error(error.response?.data?.message || "Registration failed. Please try again.");
+      }
     } finally {
       dispatch(setLoading(false));
     }

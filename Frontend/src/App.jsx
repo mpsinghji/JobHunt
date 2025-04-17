@@ -11,6 +11,9 @@ import Status from "./components/jobs/Status";
 import Companies from "./components/admin/Companies";
 import CompanyCreate from "./components/admin/CompanyCreate";
 import CompanySetup from "./components/admin/CompanySetup";
+import AdminJobs from "./components/admin/AdminJobs";
+import AdminJobCreate from "./components/admin/AdminJobCreate";
+import AdminJobSetup from "./components/admin/AdminJobSetup";
 
 const App = () => {
   return (
@@ -30,6 +33,9 @@ const App = () => {
           <Route path="/admin/companies" element={<Companies />} />
           <Route path="/admin/companies/create" element={<CompanyCreate />} />
           <Route path="/admin/companies/:id" element={<CompanySetup />} />
+          <Route path="/admin/jobs" element={<AdminJobs />} />
+          <Route path="/admin/jobs/create" element={<AdminJobCreate />} />
+          <Route path="/admin/jobs/:id" element={<AdminJobSetup />} />
 
           {/* saved applications abhi static hai */}
           {/* show expired in jobs */}
