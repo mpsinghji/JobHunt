@@ -11,23 +11,23 @@ import { setSearchCompanyByText } from "../../redux/companySlice";
 const Companies = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { companies = [], searchCompanyByText } = useSelector((state) => state.company);
-  const [filteredCompanies, setFilteredCompanies] = useState(companies);
+  const { allCompanies = [], searchCompanyByText } = useSelector((state) => state.company);
+  const [filteredCompanies, setFilteredCompanies] = useState(allCompanies);
 
   useGetAllCompanies();
 
   // Filter companies when search text or companies list changes
   React.useEffect(() => {
     if (!searchCompanyByText) {
-      setFilteredCompanies(companies);
+      setFilteredCompanies(allCompanies);
       return;
     }
 
-    const filtered = companies.filter((company) =>
+    const filtered = allCompanies.filter((company) =>
       company?.name?.toLowerCase().includes(searchCompanyByText.toLowerCase())
     );
     setFilteredCompanies(filtered);
-  }, [searchCompanyByText, companies]);
+  }, [searchCompanyByText, allCompanies]);
 
   const handleSearchChange = (e) => {
     dispatch(setSearchCompanyByText(e.target.value));
