@@ -170,25 +170,37 @@ const Profile = () => {
                                 alt="Profile"
                                 className="w-40 h-40 rounded-full object-cover border-4 border-blue-100"
                             />
-                            <div className="absolute -bottom-10 -right-2 flex gap-2">
-                                <Button
-                                    onClick={() => setOpen(true)}
-                                    className="bg-blue-600 hover:bg-blue-700 rounded-full p-2"
-                                    size="icon"
-                                >
-                                    <Edit2 className="h-4 w-4 text-white" />
-                                </Button>
-                                {user?.profile?.profilePhoto && (
+                            {user?.profile?.profilePhoto?.url ? (
+                                <div className="absolute -bottom-10 -right-2 flex gap-2">
                                     <Button
-                                        onClick={() => setShowDeleteConfirm(true)}
-                                        className="bg-red-500 hover:bg-red-600 rounded-full p-2"
+                                        onClick={() => setOpen(true)}
+                                        className="bg-blue-600 hover:bg-blue-700 rounded-full p-2"
                                         size="icon"
-                                        disabled={isRemoving}
                                     >
-                                        <Trash2 className="h-4 w-4 text-white" />
+                                        <Edit2 className="h-4 w-4 text-white" />
                                     </Button>
-                                )}
-                            </div>
+                                    {user?.profile?.profilePhoto && (
+                                        <Button
+                                            onClick={() => setShowDeleteConfirm(true)}
+                                            className="bg-red-500 hover:bg-red-600 rounded-full p-2"
+                                            size="icon"
+                                            disabled={isRemoving}
+                                        >
+                                            <Trash2 className="h-4 w-4 text-white" />
+                                        </Button>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="absolute -bottom-10 -right-2">
+                                    <Button
+                                        onClick={() => setOpen(true)}
+                                        className="bg-blue-600 hover:bg-blue-700 rounded-full p-2"
+                                        size="icon"
+                                    >
+                                        <Edit2 className="h-4 w-4 text-white" />
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                         <div className="flex-1 text-center md:text-left">
                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
