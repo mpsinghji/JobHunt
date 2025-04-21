@@ -1,6 +1,7 @@
 import Company from "../models/companyModel.js";
-import cloudinary from "cloudinary";
+import cloudinary from "../utils/cloudinary.js";
 import getDataUri from "../utils/datauri.js";
+import fs from "fs";
 
 export const registerCompany = async (req, res) => {
   try {
@@ -81,12 +82,28 @@ export const updateCompany = async (req, res) => {
     // Only handle file upload if a file is provided
     if (file) {
       try {
-        const fileUri = getDataUri(file);
-        if (!fileUri || !fileUri.content) {
-          throw new Error("Failed to process file");
+        // If there's an existing logo, delete it from Cloudinary
+        const existingCompany = await Company.findById(req.params.id);
+        if (existingCompany?.logo?.publicId) {
+          await cloudinary.uploader.destroy(existingCompany.logo.publicId);
         }
-        const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
-        updateData.logo = cloudResponse.secure_url;
+
+        // Upload the new file to Cloudinary
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: "company_logos",
+          resource_type: "auto",
+          public_id: `company_logo_${Date.now()}`,
+          access_mode: "public"
+        });
+        
+        // Update the logo data
+        updateData.logo = {
+          url: result.secure_url,
+          publicId: result.public_id
+        };
+        
+        // Delete the temporary file
+        fs.unlinkSync(file.path);
       } catch (error) {
         console.error("Error uploading file to Cloudinary:", error);
         return res.status(500).json({ 

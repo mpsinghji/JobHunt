@@ -165,9 +165,9 @@ const CompanySetup = () => {
                             className="cursor-pointer"
                           >
                             <div className="flex flex-col items-center gap-2">
-                              {singleCompany?.logo ? (
+                              {singleCompany?.logo?.url ? (
                                 <img
-                                  src={singleCompany.logo}
+                                  src={singleCompany.logo.url}
                                   alt="Company logo"
                                   className="w-16 h-16 object-cover rounded-lg"
                                 />

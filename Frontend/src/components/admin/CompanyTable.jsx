@@ -100,7 +100,7 @@ const CompanyTable = ({ companies = [] }) => {
                   <TableCell>
                     <Avatar className="h-12 w-12 rounded-none">
                       <AvatarImage
-                        src={company.logo}
+                        src={company.logo?.url}
                         alt={company.name}
                         className="object-contain w-full h-full"
                       />
