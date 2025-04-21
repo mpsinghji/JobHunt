@@ -74,7 +74,7 @@ export const Register = async (req, res) => {
     if (req.files && req.files.profilePhoto) {
       try {
         const result = await cloudinary.uploader.upload(req.files.profilePhoto[0].path, {
-          folder: "profile_photos",
+          folder: "jobhunt/profile_photos",
           resource_type: "auto"
         });
         profilePhoto = {
@@ -202,7 +202,7 @@ export const updateprofile = async (req, res) => {
 
         if (req.files && req.files.profilePhoto) {
             const result = await cloudinary.uploader.upload(req.files.profilePhoto[0].path, {
-                folder: "profile_photos",
+                folder: "jobhunt/profile_photos",
                 resource_type: "auto"
             });
             user.profile.profilePhoto = {
@@ -214,7 +214,7 @@ export const updateprofile = async (req, res) => {
 
         if (req.files && req.files.resume) {
             const result = await cloudinary.uploader.upload(req.files.resume[0].path, {
-                folder: "resumes",
+                folder: "JobHunt/resumes",
                 resource_type: "image",
                 format: "pdf"
             });

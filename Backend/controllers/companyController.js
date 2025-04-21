@@ -90,7 +90,7 @@ export const updateCompany = async (req, res) => {
 
         // Upload the new file to Cloudinary
         const result = await cloudinary.uploader.upload(file.path, {
-          folder: "company_logos",
+          folder: "jobhunt/company_logos",
           resource_type: "auto",
           public_id: `company_logo_${Date.now()}`,
           access_mode: "public"
