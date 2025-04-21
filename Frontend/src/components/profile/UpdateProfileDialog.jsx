@@ -111,13 +111,13 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
       }
 
       // Append profile info
-      formData.append("profile[bio]", input.bio || "");
-      formData.append("profile[skills]", input.skills || "");
+      formData.append("profile.bio", input.bio || "");
+      formData.append("profile.skills", input.skills || "");
 
       // Append social media links
-      formData.append("socialMediaLinks[linkedin]", input.socialMediaLinks.linkedin || "");
-      formData.append("socialMediaLinks[github]", input.socialMediaLinks.github || "");
-      formData.append("socialMediaLinks[portfolio]", input.socialMediaLinks.portfolio || "");
+      formData.append("socialMediaLinks.linkedin", input.socialMediaLinks.linkedin || "");
+      formData.append("socialMediaLinks.github", input.socialMediaLinks.github || "");
+      formData.append("socialMediaLinks.portfolio", input.socialMediaLinks.portfolio || "");
 
       // Append files if selected
       if (selectedFiles.profilePhoto) {
@@ -128,9 +128,9 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
       }
 
       // Log form data for debugging
-      // for (let [key, value] of formData.entries()) {
-      //   console.log(`${key}:`, value);
-      // }
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+      }
 
       const response = await axios.post(
         `${USER_API_END_POINT}/profile/update`,
@@ -152,6 +152,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
       }
     } catch (error) {
       console.error("Profile update error:", error);
+      console.error("Error response:", error.response?.data);
       toast.error(error.response?.data?.message || "Failed to update profile");
     } finally {
       setLoading(false);

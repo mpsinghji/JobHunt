@@ -192,12 +192,6 @@ export const logout = async (req, res) => {
 
 export const updateprofile = async (req, res) => {
     try {
-        // console.log("Update profile request:", {
-        //     body: req.body,
-        //     files: req.files,
-        //     userId: req.id
-        // });
-
         const user = await User.findById(req.id);
         if (!user) {
             return res.status(404).json({
@@ -206,7 +200,6 @@ export const updateprofile = async (req, res) => {
             });
         }
 
-        // Handle profile photo upload
         if (req.files && req.files.profilePhoto) {
             const result = await cloudinary.uploader.upload(req.files.profilePhoto[0].path, {
                 folder: "profile_photos",
@@ -219,7 +212,6 @@ export const updateprofile = async (req, res) => {
             fs.unlinkSync(req.files.profilePhoto[0].path);
         }
 
-        // Handle resume upload
         if (req.files && req.files.resume) {
             const result = await cloudinary.uploader.upload(req.files.resume[0].path, {
                 folder: "resumes",
@@ -235,27 +227,30 @@ export const updateprofile = async (req, res) => {
             fs.unlinkSync(req.files.resume[0].path);
         }
 
-        // Update user information
         if (req.body.fullname) user.fullname = req.body.fullname;
         if (req.body.email) user.email = req.body.email;
         if (req.body.phonenumber) user.phonenumber = parseInt(req.body.phonenumber);
         if (req.body.address) user.address = req.body.address;
         if (req.body.gender) user.gender = req.body.gender;
         if (req.body.dob) user.dob = req.body.dob;
-        if (req.body.profile?.bio) user.profile.bio = req.body.profile.bio;
+        if (req.body['profile.bio']) user.profile.bio = req.body['profile.bio'];
         
-        // Process skills as an array
-        if (req.body.profile?.skills) {
-            // If skills is a string, split by comma and trim whitespace
-            if (typeof req.body.profile.skills === 'string') {
-                user.profile.skills = req.body.profile.skills.split(',').map(skill => skill.trim());
-            } else if (Array.isArray(req.body.profile.skills)) {
-                // If it's already an array, use it directly
-                user.profile.skills = req.body.profile.skills;
+        if (req.body['profile.skills']) {
+            const skills = req.body['profile.skills'];
+            if (typeof skills === 'string') {
+                user.profile.skills = skills.split(',').map(skill => skill.trim());
+            } else if (Array.isArray(skills)) {
+                user.profile.skills = skills;
             }
         }
         
-        if (req.body.socialMediaLinks) user.socialMediaLinks = req.body.socialMediaLinks;
+        if (req.body['socialMediaLinks.linkedin'] || req.body['socialMediaLinks.github'] || req.body['socialMediaLinks.portfolio']) {
+            user.socialMediaLinks = {
+                linkedin: req.body['socialMediaLinks.linkedin'] || user.socialMediaLinks?.linkedin || "",
+                github: req.body['socialMediaLinks.github'] || user.socialMediaLinks?.github || "",
+                portfolio: req.body['socialMediaLinks.portfolio'] || user.socialMediaLinks?.portfolio || ""
+            };
+        }
 
         await user.save();
 
@@ -272,7 +267,8 @@ export const updateprofile = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Error updating profile",
-            error: error.message
+            error: error.message,
+            stack: error.stack
         });
     }
 };
