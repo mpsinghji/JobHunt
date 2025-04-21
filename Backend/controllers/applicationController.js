@@ -137,3 +137,53 @@ export const updateStatus = async (req,res) => {
       });
   }
 }
+
+export const withdrawApplication = async (req, res) => {
+  try {
+    const applicationId = req.params.id;
+    const userId = req.id; // Get the user ID from the authenticated request
+
+    // Find the application
+    const application = await Application.findById(applicationId);
+    
+    if (!application) {
+      return res.status(404).json({
+        message: "Application not found",
+        success: false
+      });
+    }
+
+    // Check if the user is the owner of the application
+    if (application.applicant.toString() !== userId) {
+      return res.status(403).json({
+        message: "You are not authorized to withdraw this application",
+        success: false
+      });
+    }
+
+    // Check if the application is already withdrawn
+    if (application.status === "Withdrawn") {
+      return res.status(400).json({
+        message: "Application is already withdrawn",
+        success: false
+      });
+    }
+
+    // Update the application status
+    application.status = "Withdrawn";
+    await application.save();
+
+    return res.status(200).json({
+      message: "Application withdrawn successfully",
+      success: true,
+      application
+    });
+  } catch (error) {
+    console.error("Error withdrawing application:", error);
+    return res.status(500).json({
+      message: error.message || "Error withdrawing application",
+      success: false
+    });
+  }
+};
+

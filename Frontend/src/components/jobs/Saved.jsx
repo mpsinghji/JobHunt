@@ -112,10 +112,11 @@ const Saved = () => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 mr-5"
                       onClick={() => handleDelete(job._id)}
                     >
-                      <Trash2 className="h-5 w-5" />
+                      {/* <Trash2 className="h-5 w-5" /> */}
+                      Remove
                     </Button>
                   </TableCell>
                 </TableRow>
