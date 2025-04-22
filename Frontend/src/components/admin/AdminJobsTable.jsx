@@ -74,7 +74,7 @@ const AdminJobsTable = ({ jobs = [] }) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">Logo</TableHead>
+              <TableHead className="w-[50px]">Sr No.</TableHead>
               <TableHead>Job Title</TableHead>
               <TableHead>Company</TableHead>
               <TableHead>Created</TableHead>
@@ -100,20 +100,9 @@ const AdminJobsTable = ({ jobs = [] }) => {
                 </TableCell>
               </TableRow>
             ) : (
-              jobs.map((job) => (
+              jobs.map((job, index) => (
                 <TableRow key={job._id} className="group">
-                  <TableCell>
-                    <Avatar className="h-12 w-12 rounded-none">
-                      <AvatarImage
-                        src={job.companyId?.logo}
-                        alt={job.companyId?.name}
-                        className="object-contain w-full h-full"
-                      />
-                      <AvatarFallback className="bg-primary/10 text-primary">
-                        {getInitials(job.companyId?.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                  </TableCell>
+                  <TableCell className="text-muted-foreground">{index + 1}</TableCell>
                   <TableCell>
                     <div className="font-medium">{job.title}</div>
                     <div className="text-sm text-muted-foreground">

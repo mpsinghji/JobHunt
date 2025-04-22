@@ -5,14 +5,14 @@ const isAuthenticated = async (req, res, next) => {
     const token = req.cookies.token;
     
     // Log request details for debugging
-    console.log("Auth request:", {
-      cookies: req.cookies,
-      headers: req.headers,
-      path: req.path
-    });
+    // console.log("Auth request:", {
+    //   cookies: req.cookies,
+    //   headers: req.headers,
+    //   path: req.path
+    // });
 
     if (!token) {
-      console.log("No token found in cookies");
+      // console.log("No token found in cookies");
       return res
         .status(401)
         .json({ 
@@ -23,7 +23,7 @@ const isAuthenticated = async (req, res, next) => {
 
     const decoded = await jwt.verify(token, process.env.JWT_SECRET);
     if (!decoded) {
-      console.log("Token verification failed");
+      // console.log("Token verification failed");
       return res.status(401).json({ 
         message: "Invalid or expired token. Please log in again.", 
         success: false 

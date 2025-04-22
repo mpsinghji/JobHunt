@@ -69,6 +69,7 @@ const CompanyTable = ({ companies = [] }) => {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[50px]">Sr No.</TableHead>
               <TableHead className="w-[100px]">Logo</TableHead>
               <TableHead>Company Name</TableHead>
               <TableHead>Status</TableHead>
@@ -95,8 +96,9 @@ const CompanyTable = ({ companies = [] }) => {
                 </TableCell>
               </TableRow>
             ) : (
-              companies.map((company) => (
+              companies.map((company, index) => (
                 <TableRow key={company._id} className="group">
+                  <TableCell className="text-muted-foreground">{index + 1}</TableCell>
                   <TableCell>
                     <Avatar className="h-12 w-12 rounded-none">
                       <AvatarImage

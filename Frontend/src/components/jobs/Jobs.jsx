@@ -9,7 +9,7 @@ import { useSelector } from "react-redux";
 
 const Jobs = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(true);
   const [filteredJobs, setFilteredJobs] = useState([]);
   const [activeFilters, setActiveFilters] = useState({
     "Job Type": "",
@@ -26,38 +26,25 @@ const Jobs = () => {
   };
 
   const parseSalary = (salary) => {
-    if (!salary) return 0;
-    
-    // If salary is already a number, return it
+    if (!salary) return 0;    
     if (typeof salary === 'number') {
       return salary;
     }
-    
-    // If salary is a string, parse it
     if (typeof salary === 'string') {
-      // Remove all non-numeric characters except decimal point
       const numericString = salary.replace(/[^0-9.]/g, '');
-      
-      // Convert to number
       const parsedSalary = parseFloat(numericString);
-      
-      // If salary is in lakhs (contains 'L' or 'lakh')
       if (salary.toLowerCase().includes('l') || salary.toLowerCase().includes('lakh')) {
-        return parsedSalary * 100000; // Convert lakhs to rupees
-      }
-      
+        return parsedSalary * 100000;
+      } 
       return parsedSalary;
-    }
-    
+    }    
     return 0;
   };
 
-  // Filter jobs based on search query and active filters
   useEffect(() => {
     scrollTo(0,0);
     let filtered = [...allJobs];
 
-    // Apply search query filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter((job) => {
@@ -78,8 +65,7 @@ const Jobs = () => {
         );
       });
     }
-
-    // Apply active filters
+    
     Object.entries(activeFilters).forEach(([filterType, value]) => {
       if (value) {
         filtered = filtered.filter((job) => {
