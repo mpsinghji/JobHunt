@@ -31,8 +31,21 @@ const ApplicantsTable = () => {
             toast.error(error.response?.data?.message || "Failed to update status");
         }
     }
-    
-    const openResumeModal = (resume) => {
+      const openResumeModal = (resume) => {
+        // Transform the resume URL to an image format if it's a PDF
+        if (resume?.url) {
+            // Extract the base URL and public ID for Cloudinary transformation
+            const urlParts = resume.url.split('/upload/');
+            if (urlParts.length === 2) {
+                const baseUrl = urlParts[0] + '/upload/';
+                const publicId = urlParts[1].split('.')[0]; // Remove file extension
+                // Create a transformed URL that converts document to image
+                resume = {
+                    ...resume,
+                    imageUrl: `${baseUrl}pg_1/${publicId}.jpg` // First page as JPG
+                };
+            }
+        }
         setSelectedResume(resume);
         setResumeModalOpen(true);
     }
@@ -121,72 +134,36 @@ const ApplicantsTable = () => {
                         <DialogDescription>
                             {selectedResume?.originalName || "Applicant Resume"}
                         </DialogDescription>
-                    </DialogHeader>
-                    <div className="flex flex-col items-center justify-center py-4">                        {selectedResume?.url && (
+                    </DialogHeader>                    <div className="flex flex-col items-center justify-center py-4">
+                        {selectedResume?.url && (
                             <>
-                                {selectedResume.url.toLowerCase().endsWith('.pdf') ? (
-                                    // PDF Viewer with fallback
-                                    <>
-                                        <iframe
-                                            src={`${selectedResume.url}#view=FitH&toolbar=0&navpanes=0&scrollbar=0`}
-                                            className="w-full h-[70vh] border-0"
-                                            title="Resume Preview"
-                                            onError={(e) => {
-                                                e.target.style.display = 'none';
-                                                document.getElementById('pdf-fallback').style.display = 'block';
-                                            }}
-                                        />
-                                        <div 
-                                            id="pdf-fallback" 
-                                            className="hidden text-center p-4 border border-dashed border-gray-300 rounded-md w-full"
-                                        >
-                                            <p className="mb-2">PDF preview not available</p>
-                                            <a 
-                                                href={selectedResume.url} 
-                                                target="_blank" 
-                                                rel="noopener noreferrer"
-                                                className="bg-blue-600 text-white px-4 py-2 rounded-md"
-                                            >
-                                                Open PDF
-                                            </a>
-                                        </div>
-                                    </>
-                                ) : (
-                                    // Image Viewer - Force JPG display
-                                    <div className="flex flex-col items-center">
-                                        <img
-                                            src={selectedResume.url}
-                                            alt="Resume"
-                                            className="max-w-full max-h-[70vh] object-contain"
-                                            onError={(e) => {
-                                                // If image fails, try to append jpg extension or show error
-                                                if (!e.target.src.endsWith('?format=jpg')) {
-                                                    e.target.src = `${selectedResume.url}?format=jpg`;
-                                                } else {
-                                                    e.target.style.display = 'none';
-                                                    document.getElementById('img-fallback').style.display = 'block';
-                                                }
-                                            }}
-                                        />
-                                        <div 
-                                            id="img-fallback" 
-                                            className="hidden text-center p-4 border border-dashed border-gray-300 rounded-md w-full mt-2"
-                                        >
-                                            <p className="mb-2">Image preview not available</p>
-                                        </div>
-                                    </div>
-                                )}
-                                <div className="mt-4 w-full flex justify-end">
-                                    <a
-                                        className="text-blue-600 hover:underline"
-                                        href={selectedResume.url}
-                                        target="_blank" 
-                                        rel="noopener noreferrer"
-                                        download
+                                {/* Display resume as image */}
+                                <div className="flex flex-col items-center w-full">
+                                    <img
+                                        src={selectedResume.imageUrl || selectedResume.url}
+                                        alt="Resume Preview"
+                                        className="max-w-full max-h-[70vh] object-contain border border-gray-200"
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                            document.getElementById('image-fallback').style.display = 'flex';
+                                        }}
+                                    />
+                                    <div 
+                                        id="image-fallback" 
+                                        className="hidden flex-col items-center justify-center text-center p-4 border border-dashed border-gray-300 rounded-md w-full h-[50vh]"
                                     >
-                                        Download Resume
-                                    </a>
+                                        <p className="mb-4">Preview not available</p>
+                                        <a 
+                                            href={selectedResume.url} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="bg-blue-600 text-white px-4 py-2 rounded-md"
+                                        >
+                                            Open Original File
+                                        </a>
+                                    </div>
                                 </div>
+                                
                             </>
                         )}
                     </div>
