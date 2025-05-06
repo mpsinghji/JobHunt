@@ -193,9 +193,8 @@ const Status = () => {
                       <Badge className={getStatusColor(application.status)}>
                         {application.status}
                       </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {application.status !== "Withdrawn" && (
+                    </TableCell>                    <TableCell className="text-right">
+                      {application.status !== "Withdrawn" && application.status !== "Rejected" && (
                         <Button
                           variant="ghost"
                           size="icon"
