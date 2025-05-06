@@ -14,6 +14,7 @@ import CompanySetup from "./components/admin/CompanySetup";
 import AdminJobs from "./components/admin/AdminJobs";
 import AdminJobCreate from "./components/admin/AdminJobCreate";
 import AdminJobSetup from "./components/admin/AdminJobSetup";
+import Applicants from "./components/admin/Applicants";
 
 const App = () => {
   return (
@@ -36,18 +37,18 @@ const App = () => {
           <Route path="/admin/jobs" element={<AdminJobs />} />
           <Route path="/admin/jobs/create" element={<AdminJobCreate />} />
           <Route path="/admin/jobs/:id" element={<AdminJobSetup />} />
+          <Route path="/admin/jobs/:id/applicants" element={<Applicants />} />
 
           {/* saved applications abhi static hai */}
-          {/* show expired in jobs */}
-          {/* withdraw application */}
-          {/* delete saved jobs */}
+                {/* Add status in jobs if closed then show closed in saved application and also show only open jobs in filter page */}
+                {/* delete saved jobs */}
+                {/* Open them from here also */}
+                {/* Implement Update Status of Applicant */}
           {/* browser by category */}
           {/* Implement Applicant Page */}
-          {/* Implement Update Status of Applicant */}
-          {/* Fetching Get All Applied Jobs */}
-          {/* Implement Filter Jobs Logic */}
           {/* Adding Framer-motion */}
           {/* Protecting Our Routes */}
+          {/* Admin section for approving Recruiters accounts */}
         </Routes>
       </Router>
     </>

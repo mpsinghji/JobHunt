@@ -44,7 +44,7 @@ const CompanyCreate = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="max-w-3xl mx-auto px-4 py-8 mt-12">
         <div className="bg-white rounded-lg shadow-sm p-8">
           <div className="flex items-center gap-3 mb-8">
             <div className="bg-blue-100 p-3 rounded-full">

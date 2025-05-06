@@ -91,7 +91,7 @@ const AdminJobSetup = () => {
     <>
       <Navbar />
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-3xl mx-auto px-4 py-8">
+        <div className="max-w-3xl mx-auto px-4 py-8 mt-12">
           <Button
             variant="outline"
             className="flex items-center gap-2 text-gray-500 font-semibold mb-6"

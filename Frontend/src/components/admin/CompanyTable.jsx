@@ -55,7 +55,7 @@ const CompanyTable = ({ companies = [] }) => {
   };
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 ">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Your Companies</h2>

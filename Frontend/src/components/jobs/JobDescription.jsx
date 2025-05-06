@@ -110,7 +110,7 @@ const JobDescription = () => {
   return (
     <>
       <Navbar />
-      <div className="max-w-7xl mx-auto my-10 px-4">
+      <div className="max-w-7xl mx-auto my-20 px-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Job Details */}
           <div className="lg:col-span-2 space-y-6">

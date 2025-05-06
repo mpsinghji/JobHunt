@@ -7,11 +7,9 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
-import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
 import { Card } from "../ui/card";
-import { Edit2, Trash2, Briefcase, Calendar } from "lucide-react";
+import { Edit2, Trash2, Briefcase, Calendar, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -26,7 +24,6 @@ import {
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
 import useDeleteJob from "../../hooks/useDeleteJob";
-import { toast } from "sonner";
 
 const AdminJobsTable = ({ jobs = [] }) => {
   const navigate = useNavigate();
@@ -36,16 +33,6 @@ const AdminJobsTable = ({ jobs = [] }) => {
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     return formatDistanceToNow(new Date(dateString), { addSuffix: true });
-  };
-
-  const getInitials = (name) => {
-    if (!name) return "JB";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
   };
 
   const handleDelete = async () => {
@@ -87,9 +74,7 @@ const AdminJobsTable = ({ jobs = [] }) => {
                 <TableCell colSpan={5} className="h-24 text-center">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <Briefcase className="h-8 w-8 text-muted-foreground" />
-                    <p className="text-muted-foreground">
-                      No jobs posted yet
-                    </p>
+                    <p className="text-muted-foreground">No jobs posted yet</p>
                     <Button
                       variant="outline"
                       onClick={() => navigate("/admin/jobs/create")}
@@ -102,7 +87,9 @@ const AdminJobsTable = ({ jobs = [] }) => {
             ) : (
               jobs.map((job, index) => (
                 <TableRow key={job._id} className="group">
-                  <TableCell className="text-muted-foreground">{index + 1}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {index + 1}
+                  </TableCell>
                   <TableCell>
                     <div className="font-medium">{job.title}</div>
                     <div className="text-sm text-muted-foreground">
@@ -126,9 +113,17 @@ const AdminJobsTable = ({ jobs = [] }) => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() =>
-                          navigate(`/admin/jobs/${job._id}`)
+                        onClick={
+                          () =>
+                            navigate(`/admin/jobs/${job._id}/applicants`) 
                         }
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => navigate(`/admin/jobs/${job._id}`)}
                       >
                         <Edit2 className="h-4 w-4" />
                       </Button>
@@ -148,8 +143,9 @@ const AdminJobsTable = ({ jobs = [] }) => {
                           <AlertDialogHeader>
                             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This action cannot be undone. This will permanently
-                              delete the job posting and all its associated data.
+                              This action cannot be undone. This will
+                              permanently delete the job posting and all its
+                              associated data.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>

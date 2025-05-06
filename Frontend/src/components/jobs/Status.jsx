@@ -109,7 +109,7 @@ const Status = () => {
     <>
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-6 mt-12">
           <h1 className="text-2xl font-bold">Your Applications</h1>
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-gray-500" />
@@ -141,7 +141,7 @@ const Status = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[250px]">Company & Job</TableHead>
-                  <TableHead>Position</TableHead>
+                  {/* <TableHead>Position</TableHead> */}
                   <TableHead>Applied Date</TableHead>
                   <TableHead>Last Updated</TableHead>
                   <TableHead className="text-right">Status</TableHead>
@@ -166,12 +166,12 @@ const Status = () => {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    {/* <TableCell>
                       <div className="flex items-center gap-2">
                         <Briefcase className="w-4 h-4 text-gray-500" />
                         <span>{application.job?.position}</span>
                       </div>
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-gray-500" />

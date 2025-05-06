@@ -1,8 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "../ui/button";
 import { Search, ChevronDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      navigate(`/jobs?search=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      navigate("/jobs");
+    }
+    setSearchQuery("");
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
   const scrollToContent = () => {
     window.scrollTo({
       top: window.innerHeight,
@@ -38,8 +57,11 @@ const HeroSection = () => {
                 type="text"
                 placeholder="Search jobs by title, company, or keywords..."
                 className="flex-1 px-6 py-3 text-gray-900 placeholder-gray-500 focus:outline-none"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
               />
-              <Button size="lg" className="rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8">
+              <Button onClick={handleSearch} size="lg" className="rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8">
                 <Search className="h-5 w-5 mr-2" />
                 Search
               </Button>
@@ -51,6 +73,10 @@ const HeroSection = () => {
                   <button
                     key={tag}
                     className="px-3 py-1 rounded-full bg-white hover:bg-gray-100 border border-gray-200 text-gray-700 transition-colors"
+                    onClick={() => {
+                      setSearchQuery(tag);
+                      handleSearch();
+                    }}
                   >
                     {tag}
                   </button>

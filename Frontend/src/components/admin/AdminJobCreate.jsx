@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Navbar from "../shared/Navbar";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -7,10 +7,9 @@ import { useNavigate } from "react-router-dom";
 import { Briefcase } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { JOB_API_END_POINT } from "../../utils/constants";
 import { Textarea } from "../ui/textarea";
-import { IndianRupee } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import useGetCompanies from "../../hooks/useGetCompanies";
 
@@ -68,7 +67,7 @@ const AdminJobCreate = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="max-w-3xl mx-auto px-4 py-8 mt-12">
         <div className="bg-white rounded-lg shadow-sm p-8">
           <div className="flex items-center gap-3 mb-8">
             <div className="bg-blue-100 p-3 rounded-full">

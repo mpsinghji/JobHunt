@@ -75,7 +75,7 @@ export const getApplicants = async (req,res) => {
   try {
       const jobId = req.params.id;
       const job = await Job.findById(jobId).populate({
-          path:'applications',
+          path:'application',
           options:{sort:{createdAt:-1}},
           populate:{
               path:'applicant'
@@ -118,10 +118,8 @@ export const updateStatus = async (req,res) => {
               message:"Application not found.",
               success:false
           })
-      };
-
-      // update the status
-      application.status = status.toLowerCase();
+      };      // update the status - preserving case since enum values are case-sensitive
+      application.status = status; // Remove toLowerCase() to match enum case
       await application.save();
 
       return res.status(200).json({
