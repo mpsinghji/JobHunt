@@ -22,13 +22,15 @@ const allowedOrigins = [
     process.env.WEB_URL,
     process.env.BACKEND_URL,
     process.env.BACKEND_WEB_URL,
-    "http://localhost:5555", // Add local development URL explicitly
 ];
 
 app.use(cors({
     origin: function(origin, callback) {
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
+        
+        console.log("Request from origin:", origin);
+        console.log("Allowed origins:", allowedOrigins);
         
         if (allowedOrigins.indexOf(origin) === -1) {
             const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
