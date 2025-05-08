@@ -12,11 +12,19 @@ const Applicants = () => {
   const { currentJob, loading, error } = useSelector((state) => state.application);
 
   useEffect(() => {
-    dispatch(fetchJobApplicants(params.id));
+    console.log("Fetching applicants for job ID:", params.id);
+    dispatch(fetchJobApplicants(params.id))
+      .then((result) => {
+        console.log("API Response:", result);
+        if (result.error) {
+          console.error("Error fetching applicants:", result.error);
+        }
+      });
   }, [dispatch, params.id]);
 
   useEffect(() => {
     if (error) {
+      console.error("Application error:", error);
       toast.error(error.message || "Failed to fetch applicants");
     }
   }, [error]);
@@ -32,6 +40,9 @@ const Applicants = () => {
     );
   }
 
+  console.log("Current Job Data:", currentJob);
+  console.log("Applications Array:", currentJob?.applications);
+
   return (
     <div>
       <Navbar />
@@ -39,7 +50,7 @@ const Applicants = () => {
         <h1 className="font-bold text-2xl mb-6">
           Applicants {currentJob?.applications?.length || 0}
         </h1>
-        <ApplicantsTable />
+        {currentJob && <ApplicantsTable />}
       </div>
     </div>
   );

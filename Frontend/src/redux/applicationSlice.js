@@ -20,7 +20,42 @@ export const fetchJobApplicants = createAsyncThunk(
     'application/fetchJobApplicants',
     async (jobId, { rejectWithValue }) => {
         try {
+            console.log("Fetching applicants for job:", jobId);
             const response = await api.get(`${APPLICATION_API_END_POINT}/${jobId}/applicants`);
+            console.log("Raw API Response:", response);
+            console.log("API Response Data:", response.data);
+            
+            if (!response.data.success) {
+                return rejectWithValue(response.data.message || "Failed to fetch applicants");
+            }
+
+            // Ensure the job object has applications array
+            const jobData = response.data.job;
+            console.log("Job Data before processing:", jobData);
+            
+            if (!jobData.applications) {
+                console.log("No applications array found, creating empty array");
+                jobData.applications = [];
+            }
+
+            console.log("Processed Job Data:", jobData);
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching applicants:", error);
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
+// Async thunk for updating application status
+export const updateApplicationStatus = createAsyncThunk(
+    'application/updateStatus',
+    async ({ applicationId, status }, { rejectWithValue }) => {
+        try {
+            const response = await api.post(
+                `${APPLICATION_API_END_POINT}/status/${applicationId}/update`,
+                { status }
+            );
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data || error.message);
@@ -43,13 +78,6 @@ const applicationSlice = createSlice({
         setError: (state, action) => {
             state.error = action.payload;
             state.loading = false;
-        },
-        updateApplicationStatus: (state, action) => {
-            const { applicationId, status } = action.payload;
-            const application = state.applications.find(app => app._id === applicationId);
-            if (application) {
-                application.status = status;
-            }
         }
     },
     extraReducers: (builder) => {
@@ -74,21 +102,39 @@ const applicationSlice = createSlice({
                 state.error = null;
             })
             .addCase(fetchJobApplicants.fulfilled, (state, action) => {
+                console.log("Redux State Update - Payload:", action.payload);
                 state.loading = false;
-                state.currentJob = action.payload.job;
+                // Ensure the job object has applications array
+                const jobData = action.payload.job;
+                if (!jobData.applications) {
+                    console.log("No applications array in payload, creating empty array");
+                    jobData.applications = [];
+                }
+                state.currentJob = jobData;
+                console.log("Updated Redux State:", state);
                 state.error = null;
             })
             .addCase(fetchJobApplicants.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
+            })
+            // Handle updateApplicationStatus
+            .addCase(updateApplicationStatus.fulfilled, (state, action) => {
+                if (state.currentJob?.applications) {
+                    const application = state.currentJob.applications.find(
+                        app => app._id === action.payload.application._id
+                    );
+                    if (application) {
+                        application.status = action.payload.application.status;
+                    }
+                }
             });
     }
 });
 
 export const { 
     setLoading, 
-    setError,
-    updateApplicationStatus 
+    setError
 } = applicationSlice.actions;
 
 export default applicationSlice.reducer;

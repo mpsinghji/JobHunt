@@ -1,196 +1,168 @@
 import React, { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { updateApplicationStatus } from "../../redux/applicationSlice";
+import { toast } from "sonner";
+import { Eye, MoreVertical } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "../ui/table";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "../ui/dialog";
-import { MoreHorizontal } from "lucide-react";
-import { useSelector, useDispatch } from "react-redux";
-import { toast } from "sonner";
-import { APPLICATION_API_END_POINT } from "../../utils/constants";
-import api from "../../utils/api";
-import { Badge } from "../ui/badge";
-import { updateApplicationStatus } from "../../redux/applicationSlice";
-
-const shortlistingStatus = ["Accepted", "Rejected"];
+} from "@/components/ui/dialog";
 
 const ApplicantsTable = () => {
-  const { currentJob } = useSelector((state) => state.application);
   const dispatch = useDispatch();
-  const [resumeModalOpen, setResumeModalOpen] = useState(false);
+  const { currentJob } = useSelector((state) => state.application);
   const [selectedResume, setSelectedResume] = useState(null);
+  const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
 
-  const statusHandler = async (status, id) => {
+  console.log("Current Job in Table:", currentJob);
+  console.log("Applications:", currentJob?.applications);
+
+  const handleStatusChange = async (applicationId, newStatus) => {
     try {
-      const res = await api.post(
-        `${APPLICATION_API_END_POINT}/status/${id}/update`,
-        { status }
-      );
-      if (res.data.success) {
-        dispatch(updateApplicationStatus({ applicationId: id, status }));
-        toast.success(res.data.message);
+      const result = await dispatch(updateApplicationStatus({ applicationId, status: newStatus }));
+      if (result.error) {
+        toast.error(result.error.message || "Failed to update status");
+      } else {
+        toast.success("Status updated successfully");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to update status");
+      toast.error(error.message || "Failed to update status");
     }
   };
 
-  const openResumeModal = (resume) => {
-    if (resume?.url) {
-      const urlParts = resume.url.split("/upload/");
-      if (urlParts.length === 2) {
-        const baseUrl = urlParts[0] + "/upload/";
-        const publicId = urlParts[1].split(".")[0];
-        resume = {
-          ...resume,
-          imageUrl: `${baseUrl}pg_1/${publicId}.jpg`,
-        };
-      }
+  const handleResumeClick = (resumeUrl) => {
+    if (!resumeUrl) {
+      toast.error("No resume available");
+      return;
     }
-    setSelectedResume(resume);
-    setResumeModalOpen(true);
+    setSelectedResume(resumeUrl);
+    setIsResumeModalOpen(true);
   };
 
-  if (!currentJob?.applications?.length) {
+  if (!currentJob?.applications || currentJob.applications.length === 0) {
     return (
-      <div className="text-center py-8">No applicants found for this job.</div>
+      <div className="text-center py-8">
+        <p className="text-gray-500">No applications found for this job.</p>
+      </div>
     );
   }
 
   return (
-    <div>
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold">{currentJob.title}</h2>
-        <div className="flex gap-4 mt-2">
-          <Badge>{currentJob.jobType}</Badge>
-          <Badge variant="outline">{currentJob.experience}</Badge>
-          <Badge variant="secondary">{currentJob.location}</Badge>
-        </div>
-      </div>
+    <div className="rounded-md border">
       <Table>
-        <TableCaption>List of applicants for {currentJob.title}</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead>FullName</TableHead>
+            <TableHead>Full Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Contact</TableHead>
             <TableHead>Resume</TableHead>
             <TableHead>Applied Date</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead className="text-right">Action</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {currentJob.applications.map((item) => (
-            <TableRow key={item._id}>
-              <TableCell>{item.applicant?.fullname}</TableCell>
-              <TableCell>{item.applicant?.email}</TableCell>
-              <TableCell>{item.applicant?.phonenumber}</TableCell>
-              <TableCell>
-                {item.applicant?.profile?.resume?.url ? (
-                  <span
-                    className="text-blue-600 cursor-pointer underline"
-                    onClick={() =>
-                      openResumeModal(item.applicant.profile.resume)
-                    }
+          {currentJob.applications.map((application) => {
+            const applicant = application.applicant || {};
+            const profile = applicant.profile || {};
+            const resumeUrl = profile.resume;
+
+            return (
+              <TableRow key={application._id}>
+                <TableCell>{applicant.fullname || 'N/A'}</TableCell>
+                <TableCell>{applicant.email || 'N/A'}</TableCell>
+                <TableCell>{applicant.phonenumber || 'N/A'}</TableCell>
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleResumeClick(resumeUrl)}
+                    className="flex items-center gap-2"
                   >
-                    {item.applicant.profile.resume.originalName ||
-                      "View Resume"}
+                    <Eye className="h-4 w-4" />
+                    View Resume
+                  </Button>
+                </TableCell>
+                <TableCell>
+                  {new Date(application.createdAt).toLocaleDateString()}
+                </TableCell>
+                <TableCell>
+                  <span className={`px-2 py-1 rounded-full text-xs ${
+                    application.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                    application.status === 'Approved' ? 'bg-green-100 text-green-800' :
+                    application.status === 'Rejected' ? 'bg-red-100 text-red-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {application.status}
                   </span>
-                ) : (
-                  <span>NA</span>
-                )}
-              </TableCell>
-              <TableCell>
-                {new Date(item.createdAt).toLocaleDateString()}
-              </TableCell>
-              <TableCell>
-                <Badge
-                  variant={
-                    item.status === "Pending"
-                      ? "outline"
-                      : item.status === "Accepted"
-                      ? "success"
-                      : "destructive"
-                  }
-                >
-                  {item.status}
-                </Badge>
-              </TableCell>
-              <TableCell className="text-right">
-                <Popover>
-                  <PopoverTrigger>
-                    <MoreHorizontal className="h-5 w-5" />
-                  </PopoverTrigger>
-                  <PopoverContent className="w-32">
-                    {shortlistingStatus.map((status) => (
-                      <div
-                        key={status}
-                        onClick={() => statusHandler(status, item._id)}
-                        className="flex w-full items-center px-2 py-1.5 cursor-pointer hover:bg-slate-100 rounded"
-                      >
-                        <span>{status}</span>
-                      </div>
-                    ))}
-                  </PopoverContent>
-                </Popover>
-              </TableCell>
-            </TableRow>
-          ))}
+                </TableCell>
+                <TableCell>
+                  {application.status === "Pending" && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-48">
+                        <div className="flex flex-col gap-2">
+                          <Button
+                            variant="ghost"
+                            onClick={() => handleStatusChange(application._id, "Approved")}
+                            className="text-green-600 hover:text-green-700"
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            onClick={() => handleStatusChange(application._id, "Rejected")}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            Reject
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
-      <Dialog open={resumeModalOpen} onOpenChange={setResumeModalOpen}>
-        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+
+      <Dialog open={isResumeModalOpen} onOpenChange={setIsResumeModalOpen}>
+        <DialogContent className="max-w-4xl h-[80vh]">
           <DialogHeader>
             <DialogTitle>Resume Preview</DialogTitle>
-            <DialogDescription>
-              {selectedResume?.originalName || "Applicant Resume"}
-            </DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col items-center justify-center py-4">
-            {selectedResume?.url && (
-              <>
-                <div className="flex flex-col items-center w-full">
-                  <img
-                    src={selectedResume.imageUrl || selectedResume.url}
-                    alt="Resume Preview"
-                    className="max-w-full max-h-[70vh] object-contain border border-gray-200"
-                    onError={(e) => {
-                      e.target.style.display = "none";
-                      document.getElementById("image-fallback").style.display =
-                        "flex";
-                    }}
-                  />
-                  <div
-                    id="image-fallback"
-                    className="hidden flex-col items-center justify-center text-center p-4 border border-dashed border-gray-300 rounded-md w-full h-[50vh]"
-                  >
-                    <p className="mb-4">Preview not available</p>
-                    <a
-                      href={selectedResume.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-blue-600 text-white px-4 py-2 rounded-md"
-                    >
-                      Open Original File
-                    </a>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+          {selectedResume ? (
+            <iframe
+              src={selectedResume}
+              className="w-full h-full"
+              title="Resume Preview"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-gray-500">No resume available</p>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
