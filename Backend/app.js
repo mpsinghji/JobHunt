@@ -19,7 +19,7 @@ app.use(cookieParser());
 
 // CORS configuration
 app.use(cors({
-  origin: [process.env.LOCAL_URL, process.env.WEB_URL, process.env.BACKEND_URL],
+  origin: [process.env.LOCAL_URL, process.env.WEB_URL, process.env.BACKEND_URL,process.env.BACKEND_WEB_URL],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
