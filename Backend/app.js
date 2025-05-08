@@ -20,8 +20,9 @@ app.use(cookieParser());
 const allowedOrigins = [
     process.env.LOCAL_URL,
     process.env.WEB_URL,
-    process.env.BACKEND_URL ,
-    process.env.BACKEND_WEB_URL ,
+    process.env.BACKEND_URL,
+    process.env.BACKEND_WEB_URL,
+    "http://localhost:5555", // Add local development URL explicitly
 ];
 
 app.use(cors({
