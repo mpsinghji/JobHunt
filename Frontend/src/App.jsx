@@ -15,6 +15,7 @@ import AdminJobs from "./components/admin/AdminJobs";
 import AdminJobCreate from "./components/admin/AdminJobCreate";
 import AdminJobSetup from "./components/admin/AdminJobSetup";
 import Applicants from "./components/admin/Applicants";
+import ProtectedRoutes from "./components/admin/ProtectedRoutes";
 
 const App = () => {
   return (
@@ -31,23 +32,19 @@ const App = () => {
           <Route path="/status" element={<Status />} />
 
           {/* For Admin */}
-          <Route path="/admin/companies" element={<Companies />} />
-          <Route path="/admin/companies/create" element={<CompanyCreate />} />
-          <Route path="/admin/companies/:id" element={<CompanySetup />} />
-          <Route path="/admin/jobs" element={<AdminJobs />} />
-          <Route path="/admin/jobs/create" element={<AdminJobCreate />} />
-          <Route path="/admin/jobs/:id" element={<AdminJobSetup />} />
-          <Route path="/admin/jobs/:id/applicants" element={<Applicants />} />
+          <Route path="/admin/companies" element={<ProtectedRoutes><Companies /></ProtectedRoutes>} />
+          <Route path="/admin/companies/create" element={<ProtectedRoutes><CompanyCreate /></ProtectedRoutes>} />
+          <Route path="/admin/companies/:id" element={<ProtectedRoutes><CompanySetup /></ProtectedRoutes>} />
+          <Route path="/admin/jobs" element={<ProtectedRoutes><AdminJobs /></ProtectedRoutes>} />
+          <Route path="/admin/jobs/create" element={<ProtectedRoutes><AdminJobCreate /></ProtectedRoutes>} />
+          <Route path="/admin/jobs/:id" element={<ProtectedRoutes><AdminJobSetup /></ProtectedRoutes>} />
+          <Route path="/admin/jobs/:id/applicants" element={<ProtectedRoutes><Applicants /></ProtectedRoutes>} />
 
           {/* saved applications abhi static hai */}
                 {/* Add status in jobs if closed then show closed in saved application and also show only open jobs in filter page */}
                 {/* delete saved jobs */}
                 {/* Open them from here also */}
-                {/* Implement Update Status of Applicant */}
-          {/* browser by category */}
-          {/* Implement Applicant Page */}
-          {/* Adding Framer-motion */}
-          {/* Protecting Our Routes */}
+          {/* browser by category homepage */}
           {/* Admin section for approving Recruiters accounts */}
         </Routes>
       </Router>

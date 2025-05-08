@@ -7,6 +7,8 @@ import { Search, SlidersHorizontal } from "lucide-react";
 import Navbar from "../shared/Navbar.jsx";
 import { useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+
 
 const Jobs = () => {
   const location = useLocation();
@@ -160,12 +162,16 @@ const Jobs = () => {
             ) : (
               <div className={`grid grid-cols-1 md:grid-cols-2 ${!showFilters ? 'lg:grid-cols-3' : ''} gap-6`}>
                 {filteredJobs.map((job) => (
-                  <div
+                  <motion.div
+                    initial={{opacity:0,x:100}}
+                    animate={{opacity:1,x:0}}
+                    exit={{opacity:0,x:-100}}
+                    transition={{duration:0.5}}
                     key={job._id}
                     className="transform hover:scale-105 transition-transform duration-200"
                   >
                     <JobCard job={job} />
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             )}

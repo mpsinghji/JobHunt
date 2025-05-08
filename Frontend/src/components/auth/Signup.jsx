@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Navbar from "../shared/Navbar";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -24,7 +24,7 @@ const Signup = () => {
   });
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { loading } = useSelector((state) => state.auth);
+  const { loading , user } = useSelector((state) => state.auth);
 
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
@@ -77,6 +77,11 @@ const Signup = () => {
       dispatch(setLoading(false));
     }
   };
+  useEffect(()=>{
+      if(user){
+        navigate("/");
+      }
+    })
 
   return (
     <div className="min-h-screen bg-gray-50">

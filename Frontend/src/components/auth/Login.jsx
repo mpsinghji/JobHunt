@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Navbar from "../shared/Navbar";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -19,7 +19,7 @@ const Login = () => {
     role: "jobseeker",
   });
   const [showPassword, setShowPassword] = useState(false);
-  const { loading } = useSelector((state) => state.auth);
+  const { loading , user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const changeEventHandler = (e) => {
@@ -68,6 +68,11 @@ const Login = () => {
       dispatch(setLoading(false));
     }
   };
+  useEffect(()=>{
+    if(user){
+      navigate("/");
+    }
+  })
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
