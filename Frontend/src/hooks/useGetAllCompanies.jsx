@@ -5,11 +5,10 @@ import { setAllCompanies } from "../redux/companySlice";
 import axios from "axios";
 
 const useGetAllCompanies = () => {
-  const dispatch = useDispatch();
-
-  useEffect(() => {
+  const dispatch = useDispatch();  useEffect(() => {
     const fetchCompanies = async () => {
       try {
+        // Using cookie-based authentication
         const res = await axios.get(`${COMPANY_API_END_POINT}/get`, {
           withCredentials: true,
         });

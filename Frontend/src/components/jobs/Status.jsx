@@ -27,12 +27,13 @@ const Status = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all"); // "all", "active", "withdrawn"
-
   useEffect(() => {
     const fetchApplications = async () => {
       try {
         const res = await axios.get(`${APPLICATION_API_END_POINT}/get`, {
           withCredentials: true,
+          // Since you're using cookie-based authentication, make sure credentials are included
+          // No need to manually set Authorization header when using cookie auth
         });
         if (res.data.success) {
           setApplications(res.data.application);
