@@ -20,27 +20,25 @@ import { MoreHorizontal } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "sonner";
 import { APPLICATION_API_END_POINT } from "../../utils/constants";
-import axios from "axios";
+import api from "../../utils/api";
 import { Badge } from "../ui/badge";
 import { updateApplicationStatus } from "../../redux/applicationSlice";
 
 const shortlistingStatus = ["Accepted", "Rejected"];
 
 const ApplicantsTable = () => {
-  const { job } = useSelector((store) => store.application);
+  const { currentJob } = useSelector((state) => state.application);
   const dispatch = useDispatch();
   const [resumeModalOpen, setResumeModalOpen] = useState(false);
   const [selectedResume, setSelectedResume] = useState(null);
 
   const statusHandler = async (status, id) => {
     try {
-      axios.defaults.withCredentials = true;
-      const res = await axios.post(
+      const res = await api.post(
         `${APPLICATION_API_END_POINT}/status/${id}/update`,
         { status }
       );
       if (res.data.success) {
-        // Update the UI immediately without page reload
         dispatch(updateApplicationStatus({ applicationId: id, status }));
         toast.success(res.data.message);
       }
@@ -48,18 +46,16 @@ const ApplicantsTable = () => {
       toast.error(error.response?.data?.message || "Failed to update status");
     }
   };
+
   const openResumeModal = (resume) => {
-    // Transform the resume URL to an image format if it's a PDF
     if (resume?.url) {
-      // Extract the base URL and public ID for Cloudinary transformation
       const urlParts = resume.url.split("/upload/");
       if (urlParts.length === 2) {
         const baseUrl = urlParts[0] + "/upload/";
-        const publicId = urlParts[1].split(".")[0]; // Remove file extension
-        // Create a transformed URL that converts document to image
+        const publicId = urlParts[1].split(".")[0];
         resume = {
           ...resume,
-          imageUrl: `${baseUrl}pg_1/${publicId}.jpg`, // First page as JPG
+          imageUrl: `${baseUrl}pg_1/${publicId}.jpg`,
         };
       }
     }
@@ -67,23 +63,24 @@ const ApplicantsTable = () => {
     setResumeModalOpen(true);
   };
 
-  if (!job?.application?.length) {
+  if (!currentJob?.applications?.length) {
     return (
       <div className="text-center py-8">No applicants found for this job.</div>
     );
   }
+
   return (
     <div>
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold">{job.title}</h2>
+        <h2 className="text-2xl font-semibold">{currentJob.title}</h2>
         <div className="flex gap-4 mt-2">
-          <Badge>{job.jobType}</Badge>
-          <Badge variant="outline">{job.experience}</Badge>
-          <Badge variant="secondary">{job.location}</Badge>
+          <Badge>{currentJob.jobType}</Badge>
+          <Badge variant="outline">{currentJob.experience}</Badge>
+          <Badge variant="secondary">{currentJob.location}</Badge>
         </div>
       </div>
       <Table>
-        <TableCaption>List of applicants for {job.title}</TableCaption>
+        <TableCaption>List of applicants for {currentJob.title}</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead>FullName</TableHead>
@@ -96,11 +93,11 @@ const ApplicantsTable = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {job.application.map((item) => (
+          {currentJob.applications.map((item) => (
             <TableRow key={item._id}>
               <TableCell>{item.applicant?.fullname}</TableCell>
               <TableCell>{item.applicant?.email}</TableCell>
-              <TableCell>{item.applicant?.phonenumber}</TableCell>{" "}
+              <TableCell>{item.applicant?.phonenumber}</TableCell>
               <TableCell>
                 {item.applicant?.profile?.resume?.url ? (
                   <span
@@ -154,7 +151,6 @@ const ApplicantsTable = () => {
           ))}
         </TableBody>
       </Table>
-      {/* Resume Preview Dialog/Modal */}
       <Dialog open={resumeModalOpen} onOpenChange={setResumeModalOpen}>
         <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -162,11 +158,10 @@ const ApplicantsTable = () => {
             <DialogDescription>
               {selectedResume?.originalName || "Applicant Resume"}
             </DialogDescription>
-          </DialogHeader>{" "}
+          </DialogHeader>
           <div className="flex flex-col items-center justify-center py-4">
             {selectedResume?.url && (
               <>
-                {/* Display resume as image */}
                 <div className="flex flex-col items-center w-full">
                   <img
                     src={selectedResume.imageUrl || selectedResume.url}
@@ -197,7 +192,7 @@ const ApplicantsTable = () => {
             )}
           </div>
         </DialogContent>
-      </Dialog>{" "}
+      </Dialog>
     </div>
   );
 };

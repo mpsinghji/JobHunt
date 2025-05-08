@@ -3,7 +3,6 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import Navbar from "../shared/Navbar";
 import { useParams } from "react-router-dom";
-import axios from "axios";
 import { JOB_API_END_POINT, APPLICATION_API_END_POINT, COMPANY_API_END_POINT } from "../../utils/constants";
 import { setSingleJob } from "@/redux/jobSlice.js";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,6 +10,7 @@ import { toast } from "sonner";
 import { Card } from "../ui/card";
 import { Building2, MapPin, Calendar, DollarSign, Briefcase, Users, Globe, Mail, Phone } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
+import api from "../../utils/api";
 
 const JobDescription = () => {
   const params = useParams();
@@ -29,11 +29,8 @@ const JobDescription = () => {
 
   const applyJobHandler = async () => {
     try {
-      const res = await axios.get(
-        `${APPLICATION_API_END_POINT}/apply/${JobId}`,
-        {
-          withCredentials: true,
-        }
+      const res = await api.get(
+        `${APPLICATION_API_END_POINT}/apply/${JobId}`
       );
 
       if (res.data.success) {
@@ -59,9 +56,7 @@ const JobDescription = () => {
       try {
         setIsLoading(true);
         // Fetch job details
-        const jobRes = await axios.get(`${JOB_API_END_POINT}/get/${JobId}`, {
-          withCredentials: true,
-        });
+        const jobRes = await api.get(`${JOB_API_END_POINT}/get/${JobId}`);
 
         if (jobRes.data.success) {
           dispatch(setSingleJob(jobRes.data.job));
@@ -73,9 +68,8 @@ const JobDescription = () => {
 
           // Fetch company details if job has companyId
           if (jobRes.data.job.companyId) {
-            const companyRes = await axios.get(
-              `${COMPANY_API_END_POINT}/get/${jobRes.data.job.companyId}`,
-              { withCredentials: true }
+            const companyRes = await api.get(
+              `${COMPANY_API_END_POINT}/get/${jobRes.data.job.companyId}`
             );
             if (companyRes.data.success) {
               setCompanyDetails(companyRes.data.company);

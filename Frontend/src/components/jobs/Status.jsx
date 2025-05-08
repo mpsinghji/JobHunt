@@ -21,13 +21,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import api from "../../utils/api";
 import { APPLICATION_API_END_POINT } from "../../utils/constants";
 
 const Status = () => {
   const dispatch = useDispatch();
-  const { applications, loading, error } = useSelector((state) => state.application);
+  const { applications = [], loading, error } = useSelector((state) => state.application);
   const [filter, setFilter] = React.useState("all");
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = React.useState(false);
+  const [selectedApplicationId, setSelectedApplicationId] = React.useState(null);
 
   useEffect(() => {
     dispatch(fetchApplications());
@@ -47,6 +57,7 @@ const Status = () => {
       if (res.data.success) {
         toast.success(res.data.message);
         dispatch(fetchApplications()); // Refresh the applications list
+        setIsWithdrawModalOpen(false);
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to withdraw application");
@@ -178,7 +189,11 @@ const Status = () => {
                       {application.status !== "Withdrawn" && application.status !== "Rejected" && (
                         <Button
                           variant="ghost"
-                          onClick={() => handleWithdraw(application._id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => {
+                            setSelectedApplicationId(application._id);
+                            setIsWithdrawModalOpen(true);
+                          }}
                         >
                           Withdraw
                         </Button>
@@ -191,6 +206,31 @@ const Status = () => {
           </div>
         )}
       </div>
+
+      <Dialog open={isWithdrawModalOpen} onOpenChange={setIsWithdrawModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Confirm Withdrawal</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to withdraw this application? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => setIsWithdrawModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => handleWithdraw(selectedApplicationId)}
+            >
+              Withdraw Application
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

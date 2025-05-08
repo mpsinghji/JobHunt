@@ -15,10 +15,24 @@ export const fetchApplications = createAsyncThunk(
     }
 );
 
+// Async thunk for fetching job applicants
+export const fetchJobApplicants = createAsyncThunk(
+    'application/fetchJobApplicants',
+    async (jobId, { rejectWithValue }) => {
+        try {
+            const response = await api.get(`${APPLICATION_API_END_POINT}/${jobId}/applicants`);
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
 const applicationSlice = createSlice({
     name: 'application',
     initialState: {
         applications: [],
+        currentJob: null,
         loading: false,
         error: null
     },
@@ -40,6 +54,7 @@ const applicationSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            // Handle fetchApplications
             .addCase(fetchApplications.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -50,6 +65,20 @@ const applicationSlice = createSlice({
                 state.error = null;
             })
             .addCase(fetchApplications.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            // Handle fetchJobApplicants
+            .addCase(fetchJobApplicants.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchJobApplicants.fulfilled, (state, action) => {
+                state.loading = false;
+                state.currentJob = action.payload.job;
+                state.error = null;
+            })
+            .addCase(fetchJobApplicants.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             });
