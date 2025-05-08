@@ -74,13 +74,11 @@ export const getAppliedJobs = async (req,res) => {
 export const getApplicants = async (req,res) => {
   try {
       const jobId = req.params.id;
-      console.log("Fetching applicants for job:", jobId);
       
       // First get the job
       const job = await Job.findById(jobId);
       
       if(!job) {
-          console.log("Job not found:", jobId);
           return res.status(404).json({
               message: 'Job not found.',
               success: false
@@ -99,36 +97,15 @@ export const getApplicants = async (req,res) => {
         })
         .sort({ createdAt: -1 });
 
-      console.log("Found applications:", applications.length);
-      if (applications.length > 0) {
-          console.log("First application:", {
-              id: applications[0]._id,
-              applicant: applications[0].applicant,
-              status: applications[0].status
-          });
-      }
-
       // Convert job to plain object and add applications
       const jobData = job.toObject();
       jobData.applications = applications;
-
-      console.log("Sending response:", {
-          jobId: jobData._id,
-          applicationsCount: jobData.applications.length,
-          hasApplications: !!jobData.applications,
-          firstApplication: jobData.applications[0] ? {
-              id: jobData.applications[0]._id,
-              applicant: jobData.applications[0].applicant,
-              status: jobData.applications[0].status
-          } : null
-      });
 
       return res.status(200).json({
           job: jobData,
           success: true
       });
   } catch (error) {
-      console.error("Error in getApplicants:", error);
       return res.status(500).json({
           message: error.message || "Error fetching applicants",
           success: false

@@ -20,10 +20,7 @@ export const fetchJobApplicants = createAsyncThunk(
     'application/fetchJobApplicants',
     async (jobId, { rejectWithValue }) => {
         try {
-            console.log("Fetching applicants for job:", jobId);
             const response = await api.get(`${APPLICATION_API_END_POINT}/${jobId}/applicants`);
-            console.log("Raw API Response:", response);
-            console.log("API Response Data:", response.data);
             
             if (!response.data.success) {
                 return rejectWithValue(response.data.message || "Failed to fetch applicants");
@@ -31,17 +28,12 @@ export const fetchJobApplicants = createAsyncThunk(
 
             // Ensure the job object has applications array
             const jobData = response.data.job;
-            console.log("Job Data before processing:", jobData);
-            
             if (!jobData.applications) {
-                console.log("No applications array found, creating empty array");
                 jobData.applications = [];
             }
 
-            console.log("Processed Job Data:", jobData);
             return response.data;
         } catch (error) {
-            console.error("Error fetching applicants:", error);
             return rejectWithValue(error.response?.data || error.message);
         }
     }
@@ -102,16 +94,13 @@ const applicationSlice = createSlice({
                 state.error = null;
             })
             .addCase(fetchJobApplicants.fulfilled, (state, action) => {
-                console.log("Redux State Update - Payload:", action.payload);
                 state.loading = false;
                 // Ensure the job object has applications array
                 const jobData = action.payload.job;
                 if (!jobData.applications) {
-                    console.log("No applications array in payload, creating empty array");
                     jobData.applications = [];
                 }
                 state.currentJob = jobData;
-                console.log("Updated Redux State:", state);
                 state.error = null;
             })
             .addCase(fetchJobApplicants.rejected, (state, action) => {
