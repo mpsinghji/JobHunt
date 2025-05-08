@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { COMPANY_API_END_POINT } from "../utils/constants";
 import { setAllCompanies } from "../redux/companySlice";
