@@ -22,7 +22,7 @@ const allowedOrigins = [
     process.env.WEB_URL,
     process.env.BACKEND_URL,
     process.env.BACKEND_WEB_URL,
-];
+].filter(Boolean); // Remove any undefined values
 
 app.use(cors({
     origin: function(origin, callback) {
@@ -32,11 +32,12 @@ app.use(cors({
         console.log("Request from origin:", origin);
         console.log("Allowed origins:", allowedOrigins);
         
-        if (allowedOrigins.indexOf(origin) === -1) {
-            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-            return callback(new Error(msg), false);
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
         }
-        return callback(null, true);
+        
+        const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+        return callback(new Error(msg), false);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
