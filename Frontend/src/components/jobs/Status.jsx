@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchApplications } from "../../redux/applicationSlice";
 import Navbar from "../shared/Navbar";
 import {
   Table,
@@ -9,11 +11,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import axios from "axios";
-import { APPLICATION_API_END_POINT } from "../../utils/constants";
 import { toast } from "sonner";
 import { Building2, Briefcase, Calendar, Clock, Filter } from "lucide-react";
-import Saved from "./Saved";
 import { Button } from "../ui/button";
 import {
   Select,
@@ -22,31 +21,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import api from "../../utils/api";
+import { APPLICATION_API_END_POINT } from "../../utils/constants";
 
 const Status = () => {
-  const [applications, setApplications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("all"); // "all", "active", "withdrawn"
+  const dispatch = useDispatch();
+  const { applications, loading, error } = useSelector((state) => state.application);
+  const [filter, setFilter] = React.useState("all");
+
   useEffect(() => {
-    const fetchApplications = async () => {
-      try {
-        const res = await axios.get(`${APPLICATION_API_END_POINT}/get`, {
-          withCredentials: true,
-          // Since you're using cookie-based authentication, make sure credentials are included
-          // No need to manually set Authorization header when using cookie auth
-        });
-        if (res.data.success) {
-          setApplications(res.data.application);
-        }
-      } catch (error) {
-        console.log(error);
-        toast.error(error.response?.data?.message || "Failed to fetch applications");
-      } finally {
-        setLoading(false);
+    dispatch(fetchApplications());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error.message || "Failed to fetch applications");
+    }
+  }, [error]);
+
+  const handleWithdraw = async (applicationId) => {
+    try {
+      const res = await api.post(
+        `${APPLICATION_API_END_POINT}/withdraw/${applicationId}`
+      );
+      if (res.data.success) {
+        toast.success(res.data.message);
+        dispatch(fetchApplications()); // Refresh the applications list
       }
-    };
-    fetchApplications();
-  }, []);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to withdraw application");
+    }
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -58,25 +63,6 @@ const Status = () => {
         return "bg-gray-100 text-gray-800";
       default:
         return "bg-yellow-100 text-yellow-800";
-    }
-  };
-
-  const handleWithdraw = async (applicationId) => {
-    try {
-      const res = await axios.post(
-        `${APPLICATION_API_END_POINT}/withdraw/${applicationId}`,
-        {},
-        {
-          withCredentials: true,
-        }
-      );
-      if (res.data.success) {
-        toast.success(res.data.message);
-        setApplications(applications.filter((application) => application._id !== applicationId));
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(error.response?.data?.message || "Failed to withdraw application");
     }
   };
 
@@ -142,7 +128,6 @@ const Status = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[250px]">Company & Job</TableHead>
-                  {/* <TableHead>Position</TableHead> */}
                   <TableHead>Applied Date</TableHead>
                   <TableHead>Last Updated</TableHead>
                   <TableHead className="text-right">Status</TableHead>
@@ -167,12 +152,6 @@ const Status = () => {
                         </div>
                       </div>
                     </TableCell>
-                    {/* <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Briefcase className="w-4 h-4 text-gray-500" />
-                        <span>{application.job?.position}</span>
-                      </div>
-                    </TableCell> */}
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-gray-500" />
@@ -194,12 +173,11 @@ const Status = () => {
                       <Badge className={getStatusColor(application.status)}>
                         {application.status}
                       </Badge>
-                    </TableCell>                    <TableCell className="text-right">
+                    </TableCell>
+                    <TableCell className="text-right">
                       {application.status !== "Withdrawn" && application.status !== "Rejected" && (
                         <Button
                           variant="ghost"
-                          size="icon"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50 mr-5"
                           onClick={() => handleWithdraw(application._id)}
                         >
                           Withdraw
@@ -213,7 +191,6 @@ const Status = () => {
           </div>
         )}
       </div>
-      <Saved />
     </>
   );
 };
