@@ -3,7 +3,7 @@ import JobCard from "./JobCard.jsx";
 import FilterCard from "./FilterCard.jsx";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
 import Navbar from "../shared/Navbar.jsx";
 import { useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
@@ -15,6 +15,8 @@ const Jobs = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(true);
   const [filteredJobs, setFilteredJobs] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [jobsPerPage] = useState(6);
   const [activeFilters, setActiveFilters] = useState({
     "Job Type": "",
     "Experience Level": "",
@@ -109,7 +111,23 @@ const Jobs = () => {
     });
 
     setFilteredJobs(filtered);
+    // Reset to first page whenever filters or search changes
+    setCurrentPage(1);
   }, [searchQuery, allJobs, activeFilters]);
+
+  // Get current jobs for pagination
+  const indexOfLastJob = currentPage * jobsPerPage;
+  const indexOfFirstJob = indexOfLastJob - jobsPerPage;
+  const currentJobs = filteredJobs.slice(indexOfFirstJob, indexOfLastJob);
+  const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
+
+  // Change page
+  const paginate = (pageNumber) => {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
@@ -160,20 +178,69 @@ const Jobs = () => {
                 </p>
               </div>
             ) : (
-              <div className={`grid grid-cols-1 md:grid-cols-2 ${!showFilters ? 'lg:grid-cols-3' : ''} gap-6`}>
-                {filteredJobs.map((job) => (
-                  <motion.div
-                    initial={{opacity:0,x:100}}
-                    animate={{opacity:1,x:0}}
-                    exit={{opacity:0,x:-100}}
-                    transition={{duration:0.5}}
-                    key={job._id}
-                    className="transform hover:scale-105 transition-transform duration-200"
-                  >
-                    <JobCard job={job} />
-                  </motion.div>
-                ))}
-              </div>
+              <>
+                <div className={`grid grid-cols-1 md:grid-cols-2 ${!showFilters ? 'lg:grid-cols-3' : ''} gap-6`}>
+                  {currentJobs.map((job) => (
+                    <motion.div
+                      initial={{opacity:0,x:100}}
+                      animate={{opacity:1,x:0}}
+                      exit={{opacity:0,x:-100}}
+                      transition={{duration:0.5}}
+                      key={job._id}
+                      className="transform hover:scale-105 transition-transform duration-200"
+                    >
+                      <JobCard job={job} />
+                    </motion.div>
+                  ))}
+                </div>
+                
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="mt-10 flex justify-center">
+                    <nav className="flex items-center bg-white px-4 py-3 rounded-lg shadow-md">
+                      <button
+                        onClick={() => paginate(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className={`mr-2 p-2 rounded-full flex items-center justify-center ${
+                          currentPage === 1 
+                            ? 'text-gray-300 cursor-not-allowed' 
+                            : 'text-blue-600 hover:bg-blue-50'
+                        }`}
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                      
+                      <div className="flex space-x-1">
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => (
+                          <button
+                            key={number}
+                            onClick={() => paginate(number)}
+                            className={`w-8 h-8 flex items-center justify-center rounded-full ${
+                              currentPage === number
+                                ? 'bg-blue-600 text-white'
+                                : 'text-gray-700 hover:bg-blue-50'
+                            }`}
+                          >
+                            {number}
+                          </button>
+                        ))}
+                      </div>
+                      
+                      <button
+                        onClick={() => paginate(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className={`ml-2 p-2 rounded-full flex items-center justify-center ${
+                          currentPage === totalPages
+                            ? 'text-gray-300 cursor-not-allowed'
+                            : 'text-blue-600 hover:bg-blue-50'
+                        }`}
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    </nav>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
