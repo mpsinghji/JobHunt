@@ -17,7 +17,11 @@ import AdminJobSetup from "./components/admin/AdminJobSetup";
 import Applicants from "./components/admin/Applicants";
 import ProtectedRoutes from "./components/admin/ProtectedRoutes";
 
+import { BASE_BACKEND_URL } from "./utils/constants";
+
 const App = () => {
+  console.log("Current environment:", import.meta.env);
+  console.log("Backend URL:", BASE_BACKEND_URL);
   return (
     <>
       <Router>
