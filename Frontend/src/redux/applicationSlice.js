@@ -48,9 +48,14 @@ export const updateApplicationStatus = createAsyncThunk(
                 `${APPLICATION_API_END_POINT}/status/${applicationId}/update`,
                 { status }
             );
+            
+            if (!response.data.success) {
+                return rejectWithValue(response.data.message || "Failed to update status");
+            }
+            
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || error.message);
+            return rejectWithValue(error.response?.data?.message || error.message);
         }
     }
 );
@@ -108,15 +113,25 @@ const applicationSlice = createSlice({
                 state.error = action.payload;
             })
             // Handle updateApplicationStatus
+            .addCase(updateApplicationStatus.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
             .addCase(updateApplicationStatus.fulfilled, (state, action) => {
+                state.loading = false;
                 if (state.currentJob?.applications) {
                     const application = state.currentJob.applications.find(
-                        app => app._id === action.payload.application._id
+                        app => app._id === action.meta.arg.applicationId
                     );
                     if (application) {
-                        application.status = action.payload.application.status;
+                        application.status = action.meta.arg.status;
                     }
                 }
+                state.error = null;
+            })
+            .addCase(updateApplicationStatus.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
             });
     }
 });

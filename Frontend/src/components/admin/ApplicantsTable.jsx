@@ -35,11 +35,13 @@ const ApplicantsTable = () => {
 
   const handleStatusChange = async (applicationId, newStatus) => {
     try {
-      const result = await dispatch(updateApplicationStatus({ applicationId, status: newStatus }));
-      if (result.error) {
-        toast.error(result.error.message || "Failed to update status");
-      } else {
-        toast.success("Status updated successfully");
+      const result = await dispatch(updateApplicationStatus({ 
+        applicationId, 
+        status: newStatus 
+      })).unwrap();
+
+      if (result.success) {
+        toast.success(result.message || "Status updated successfully");
       }
     } catch (error) {
       toast.error(error.message || "Failed to update status");
@@ -105,7 +107,7 @@ const ApplicantsTable = () => {
                 <TableCell>
                   <span className={`px-2 py-1 rounded-full text-xs ${
                     application.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                    application.status === 'Approved' ? 'bg-green-100 text-green-800' :
+                    application.status === 'Accepted' ? 'bg-green-100 text-green-800' :
                     application.status === 'Rejected' ? 'bg-red-100 text-red-800' :
                     'bg-gray-100 text-gray-800'
                   }`}>
@@ -113,22 +115,33 @@ const ApplicantsTable = () => {
                   </span>
                 </TableCell>
                 <TableCell>
-                  {application.status === "Pending" && (
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-48">
-                        <div className="flex flex-col gap-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-48">
+                      <div className="flex flex-col gap-2">
+                        {application.status !== "Accepted" && (
                           <Button
                             variant="ghost"
-                            onClick={() => handleStatusChange(application._id, "Approved")}
+                            onClick={() => handleStatusChange(application._id, "Accepted")}
                             className="text-green-600 hover:text-green-700"
                           >
                             Approve
                           </Button>
+                        )}
+                        {application.status !== "Pending" && (
+                          <Button
+                            variant="ghost"
+                            onClick={() => handleStatusChange(application._id, "Pending")}
+                            className="text-yellow-600 hover:text-yellow-700"
+                          >
+                            Move to Pending
+                          </Button>
+                        )}
+                        {application.status !== "Rejected" && (
                           <Button
                             variant="ghost"
                             onClick={() => handleStatusChange(application._id, "Rejected")}
@@ -136,10 +149,10 @@ const ApplicantsTable = () => {
                           >
                             Reject
                           </Button>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  )}
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </TableCell>
               </TableRow>
             );
