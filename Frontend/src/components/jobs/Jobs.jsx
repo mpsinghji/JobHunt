@@ -55,11 +55,12 @@ const Jobs = () => {
     }    
     return 0;
   };
-
   useEffect(() => {
     scrollTo(0,0);
+    // Create a copy of all jobs to work with
     let filtered = [...allJobs];
 
+    // Apply search filtering if search query exists
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter((job) => {
@@ -107,11 +108,21 @@ const Jobs = () => {
               return true;
           }
         });
-      }
-    });
+      }    });
 
-    setFilteredJobs(filtered);
-    // Reset to first page whenever filters or search changes
+    // Shuffle the filtered jobs array for randomized display
+    // Fisher-Yates (Knuth) Shuffle algorithm
+    const shuffleJobs = (array) => {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    };
+    
+    const shuffledJobs = shuffleJobs(filtered);
+    setFilteredJobs(shuffledJobs);
     setCurrentPage(1);
   }, [searchQuery, allJobs, activeFilters]);
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { Badge } from "../ui/badge";
-import { Building2, MapPin, Clock, IndianRupee, Briefcase } from "lucide-react";
+import { Building2, MapPin, Clock, Briefcase } from "lucide-react";
 
 const LatestJobCards = ({ item }) => {
   // Function to format salary to Indian format with ₹ symbol
@@ -64,7 +64,6 @@ const LatestJobCards = ({ item }) => {
             {item?.jobType || "Job Type not specified"}
           </Badge>
           <Badge variant="outline" className="flex items-center gap-1">
-            <IndianRupee className="w-3 h-3" />
             {item?.salary ? formatSalary(item.salary) : "Salary not specified"}
           </Badge>
         </div>

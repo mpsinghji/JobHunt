@@ -112,12 +112,6 @@ const JobCard = ({ job }) => {
             >
               Details
             </Button>
-            <Button
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition-all duration-200"
-              onClick={() => {/* TODO: Implement save functionality */}}
-            >
-              Save
-            </Button>
           </div>
         </div>
       </div>
