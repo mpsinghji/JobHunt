@@ -192,7 +192,7 @@ const Jobs = () => {
               <>
                 <div className={`grid grid-cols-1 md:grid-cols-2 ${!showFilters ? 'lg:grid-cols-3' : ''} gap-6`}>
                   {currentJobs.map((job) => (
-                    <motion.div
+                    <div
                       initial={{opacity:0,x:100}}
                       animate={{opacity:1,x:0}}
                       exit={{opacity:0,x:-100}}
@@ -201,7 +201,17 @@ const Jobs = () => {
                       className="transform hover:scale-105 transition-transform duration-200"
                     >
                       <JobCard job={job} />
-                    </motion.div>
+                    </div>
+                    // <motion.div
+                    //   initial={{opacity:0,x:100}}
+                    //   animate={{opacity:1,x:0}}
+                    //   exit={{opacity:0,x:-100}}
+                    //   transition={{duration:0.5}}
+                    //   key={job._id}
+                    //   className="transform hover:scale-105 transition-transform duration-200"
+                    // >
+                    //   <JobCard job={job} />
+                    // </motion.div>
                   ))}
                 </div>
                 

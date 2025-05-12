@@ -32,7 +32,7 @@ const CategoryCarousel = () => {
       <Carousel 
         className="w-full max-w-5xl mx-auto"
         opts={{ 
-          slidesToScroll: 2 // Make it scroll 2 slides at a time
+          slidesToScroll: 2 
         }}
       >
         <CarouselContent className="-ml-2 md:-ml-4">

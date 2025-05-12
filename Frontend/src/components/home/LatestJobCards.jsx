@@ -1,8 +1,16 @@
 import React from "react";
 import { Badge } from "../ui/badge";
 import { Building2, MapPin, Clock, Briefcase } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const LatestJobCards = ({ item }) => {
+  const navigate = useNavigate();
+
+  // Function to handle card click
+  const handleCardClick = () => {
+    navigate(`/description/${item?._id}`);
+  };
+
   // Function to format salary to Indian format with ₹ symbol
   const formatSalary = (salary) => {
     const formattedSalary = new Intl.NumberFormat('en-IN', {
@@ -20,7 +28,10 @@ const LatestJobCards = ({ item }) => {
   };
 
   return (
-    <div className="group p-6 rounded-xl shadow-sm hover:shadow-md bg-white border border-gray-100 transition-all duration-300 hover:border-blue-100 cursor-pointer">
+    <div 
+      className="group p-6 rounded-xl shadow-sm hover:shadow-md bg-white border border-gray-100 transition-all duration-300 hover:border-blue-100 cursor-pointer"
+      onClick={handleCardClick}
+    >
       <div className="space-y-4">
         {/* Company Info */}
         <div className="flex items-start justify-between">
@@ -53,12 +64,12 @@ const LatestJobCards = ({ item }) => {
           </p>
         </div>
 
-        {/* Job Meta */}
+        {/* Job Meta */}  
         <div className="flex flex-wrap gap-2">
-          <Badge variant="outline" className="flex items-center gap-1">
+          {/* <Badge variant="outline" className="flex items-center gap-1">
             <Briefcase className="w-3 h-3" />
             {item?.position || "Position not specified"}
-          </Badge>
+          </Badge> */}
           <Badge variant="outline" className="flex items-center gap-1">
             <Clock className="w-3 h-3" />
             {item?.jobType || "Job Type not specified"}
