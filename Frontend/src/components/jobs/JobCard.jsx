@@ -3,9 +3,33 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { MapPin, Briefcase, Building2, Clock, UserCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const JobCard = ({ job }) => {
   const navigate = useNavigate();
+  const { applications } = useSelector((store) => store.application);
+  
+  const handleCardClick = () => {
+    navigate(`/description/${job?._id}`);
+  }
+
+  // Find if user has applied for this job
+  const userApplication = applications?.find((app) => app.job?._id === job?._id);
+
+  // Function to get status badge color
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Accepted":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "Rejected":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "Withdrawn":
+        return "bg-yellow-100 text-gray-800 border-gray-200";
+      case "Pending":
+      default:
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+    }
+  };
 
   const formatSalary = (salary) => {
     if (!salary) return "Not specified";
@@ -28,7 +52,7 @@ const JobCard = ({ job }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
+    <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100"  onClick={handleCardClick}>
       <div className="p-5">
         <div className="flex items-start justify-between mb-2">
           <div className="flex-1">
@@ -47,12 +71,6 @@ const JobCard = ({ job }) => {
                 {job?.jobType || "Job Type"}
               </span>
             </div>
-            {/* <div className="flex items-center gap-2 text-gray-600">
-              <UserCircle className="h-4 w-4 text-gray-500" />
-              <span className="text-sm font-medium">
-                {job?.position || "Position"}
-              </span>
-            </div> */}
           </div>
           <div className="flex flex-col items-end">
             <div className="flex items-center gap-1 text-gray-500 text-xs bg-gray-50 px-2 py-1 rounded-full">
@@ -105,13 +123,20 @@ const JobCard = ({ job }) => {
             {formatSalary(job?.salary)}
           </div>
           <div className="flex gap-2">
-            <Button
+            {/* <Button
               onClick={() => navigate(`/description/${job?._id}`)}
               variant="outline"
               className="text-black hover:text-white hover:bg-black rounded-xl transition-all duration-200"
             >
               Details
-            </Button>
+            </Button> */}
+            {userApplication && (
+              <div className="">
+                <Badge className={`${getStatusColor(userApplication.status)}`}>
+                  {userApplication.status}
+                </Badge>
+              </div>
+            )}
           </div>
         </div>
       </div>
