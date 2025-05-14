@@ -23,6 +23,8 @@ const Jobs = () => {
     "Salary Range": "",
   });
   const { allJobs } = useSelector((store) => store.job);
+  const { applications } = useSelector((store) => store.application);
+  const { user } = useSelector((store) => store.auth);
 
   useEffect(() => {
     // Get search query from URL
@@ -56,11 +58,23 @@ const Jobs = () => {
     return 0;
   };
   useEffect(() => {
-    scrollTo(0,0);
-    // Create a copy of all jobs to work with
     let filtered = [...allJobs];
+    if (user && applications && applications.length > 0) {
+      // console.log('Applications:', applications);
+      
+      const appliedJobIds = applications
+        .filter(app => app && app.job && app.job._id)
+        .map(app => app.job._id)
+        .filter(id => id);
 
-    // Apply search filtering if search query exists
+      // console.log('Applied Job IDs:', appliedJobIds);
+      // console.log('All Jobs:', allJobs.map(job => job._id));
+      
+      filtered = filtered.filter(job => !appliedJobIds.includes(job._id));
+      
+      // console.log('Filtered Jobs:', filtered.map(job => job._id));
+    }
+
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter((job) => {
@@ -124,7 +138,7 @@ const Jobs = () => {
     const shuffledJobs = shuffleJobs(filtered);
     setFilteredJobs(shuffledJobs);
     setCurrentPage(1);
-  }, [searchQuery, allJobs, activeFilters]);
+  }, [searchQuery, allJobs, activeFilters, user, applications]);
 
   // Get current jobs for pagination
   const indexOfLastJob = currentPage * jobsPerPage;
