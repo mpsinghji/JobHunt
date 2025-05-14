@@ -31,9 +31,11 @@ import {
 } from "@/components/ui/dialog";
 import api from "../../utils/api";
 import { APPLICATION_API_END_POINT } from "../../utils/constants";
+import { useNavigate } from "react-router-dom";
 
 const Status = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { applications = [], loading, error } = useSelector((state) => state.application);
   const [filter, setFilter] = React.useState("all");
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = React.useState(false);
@@ -62,6 +64,10 @@ const Status = () => {
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to withdraw application");
     }
+  };
+
+  const handleJobClick = (jobId) => {
+    navigate(`/description/${jobId}`);
   };
 
   const getStatusColor = (status) => {
@@ -154,7 +160,10 @@ const Status = () => {
                           <Building2 className="w-4 h-4 text-gray-600" />
                         </div>
                         <div>
-                          <div className="font-semibold">
+                          <div 
+                            className="font-semibold cursor-pointer hover:text-blue-600 transition-colors"
+                            onClick={() => handleJobClick(application.job._id)}
+                          >
                             {application.job?.title}
                           </div>
                           <div className="text-sm text-gray-500">
