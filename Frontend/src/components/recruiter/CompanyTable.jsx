@@ -88,7 +88,7 @@ const CompanyTable = ({ companies = [] }) => {
                     </p>
                     <Button
                       variant="outline"
-                      onClick={() => navigate("/admin/companies/create")}
+                      onClick={() => navigate("/recruiter/companies/create")}
                     >
                       Add Your First Company
                     </Button>
@@ -134,7 +134,7 @@ const CompanyTable = ({ companies = [] }) => {
                         variant="ghost"
                         size="icon"
                         onClick={() =>
-                          navigate(`/admin/companies/${company._id}`)
+                          navigate(`/recruiter/companies/${company._id}`)
                         }
                       >
                         <Edit2 className="h-4 w-4" />

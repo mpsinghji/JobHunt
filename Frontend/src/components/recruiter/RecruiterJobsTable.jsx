@@ -25,7 +25,7 @@ import {
 } from "../ui/alert-dialog";
 import useDeleteJob from "../../hooks/useDeleteJob";
 
-const AdminJobsTable = ({ jobs = [] }) => {
+const RecruiterJobsTable = ({ jobs = [] }) => {
   const navigate = useNavigate();
   const { deleteJob, isLoading } = useDeleteJob();
   const [jobToDelete, setJobToDelete] = useState(null);
@@ -77,7 +77,7 @@ const AdminJobsTable = ({ jobs = [] }) => {
                     <p className="text-muted-foreground">No jobs posted yet</p>
                     <Button
                       variant="outline"
-                      onClick={() => navigate("/admin/jobs/create")}
+                      onClick={() => navigate("/recruiter/jobs/create")}
                     >
                       Post Your First Job
                     </Button>
@@ -115,7 +115,7 @@ const AdminJobsTable = ({ jobs = [] }) => {
                         size="icon"
                         onClick={
                           () =>
-                            navigate(`/admin/jobs/${job._id}/applicants`) 
+                            navigate(`/recruiter/jobs/${job._id}/applicants`) 
                         }
                       >
                         <Eye className="h-4 w-4" />
@@ -123,7 +123,7 @@ const AdminJobsTable = ({ jobs = [] }) => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => navigate(`/admin/jobs/${job._id}`)}
+                        onClick={() => navigate(`/recruiter/jobs/${job._id}`)}
                       >
                         <Edit2 className="h-4 w-4" />
                       </Button>
@@ -172,4 +172,4 @@ const AdminJobsTable = ({ jobs = [] }) => {
   );
 };
 
-export default AdminJobsTable;
+export default RecruiterJobsTable;

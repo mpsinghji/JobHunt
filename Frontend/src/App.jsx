@@ -8,14 +8,14 @@ import JobDescription from "./components/jobs/JobDescription";
 import Profile from "./components/profile/Profile";
 import About from "./components/shared/About";
 import Status from "./components/jobs/Status";
-import Companies from "./components/admin/Companies";
-import CompanyCreate from "./components/admin/CompanyCreate";
-import CompanySetup from "./components/admin/CompanySetup";
-import AdminJobs from "./components/admin/AdminJobs";
-import AdminJobCreate from "./components/admin/AdminJobCreate";
-import AdminJobSetup from "./components/admin/AdminJobSetup";
-import Applicants from "./components/admin/Applicants";
-import ProtectedRoutes from "./components/admin/ProtectedRoutes";
+import Companies from "./components/recruiter/Companies";
+import CompanyCreate from "./components/recruiter/CompanyCreate";
+import CompanySetup from "./components/recruiter/CompanySetup";
+import RecruiterJobs from "./components/recruiter/RecruiterJobs";
+import RecruiterJobCreate from "./components/recruiter/RecruiterJobCreate";
+import RecruiterJobSetup from "./components/recruiter/RecruiterJobSetup";
+import Applicants from "./components/recruiter/Applicants";
+import ProtectedRoutes from "./components/recruiter/ProtectedRoutes";
 
 import { BASE_BACKEND_URL } from "./utils/constants";
 
@@ -35,20 +35,20 @@ const App = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/status" element={<Status />} />
 
-          {/* For Admin */}
-          <Route path="/admin/companies" element={<ProtectedRoutes><Companies /></ProtectedRoutes>} />
-          <Route path="/admin/companies/create" element={<ProtectedRoutes><CompanyCreate /></ProtectedRoutes>} />
-          <Route path="/admin/companies/:id" element={<ProtectedRoutes><CompanySetup /></ProtectedRoutes>} />
-          <Route path="/admin/jobs" element={<ProtectedRoutes><AdminJobs /></ProtectedRoutes>} />
-          <Route path="/admin/jobs/create" element={<ProtectedRoutes><AdminJobCreate /></ProtectedRoutes>} />
-          <Route path="/admin/jobs/:id" element={<ProtectedRoutes><AdminJobSetup /></ProtectedRoutes>} />
-          <Route path="/admin/jobs/:id/applicants" element={<ProtectedRoutes><Applicants /></ProtectedRoutes>} />
+          {/* For Recruiter */}
+          <Route path="/recruiter/companies" element={<ProtectedRoutes><Companies /></ProtectedRoutes>} />
+          <Route path="/recruiter/companies/create" element={<ProtectedRoutes><CompanyCreate /></ProtectedRoutes>} />
+          <Route path="/recruiter/companies/:id" element={<ProtectedRoutes><CompanySetup /></ProtectedRoutes>} />
+          <Route path="/recruiter/jobs" element={<ProtectedRoutes><RecruiterJobs /></ProtectedRoutes>} />
+          <Route path="/recruiter/jobs/create" element={<ProtectedRoutes><RecruiterJobCreate /></ProtectedRoutes>} />
+          <Route path="/recruiter/jobs/:id" element={<ProtectedRoutes><RecruiterJobSetup /></ProtectedRoutes>} />
+          <Route path="/recruiter/jobs/:id/applicants" element={<ProtectedRoutes><Applicants /></ProtectedRoutes>} />
 
           {/* saved applications abhi static hai */}
                 {/* Add status in jobs if closed then show closed in saved application and also show only open jobs in filter page */}
                 {/* delete saved jobs */}
                 {/* Open them from here also */}
-          {/* Admin section for approving Recruiters accounts */}
+          {/* Recruiter section for managing jobs and applications */}
         </Routes>
       </Router>
     </>

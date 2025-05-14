@@ -33,7 +33,7 @@ const CompanyCreate = () => {
         dispatch(setSingleCompany(res.data.company));
         toast.success(res.data.message);
         const companyId = res.data.company._id;
-        navigate(`/admin/companies/${companyId}`);
+        navigate(`/recruiter/companies/${companyId}`);
       }
     } catch (error) {
       console.error("Company registration error:", error);
@@ -85,7 +85,7 @@ const CompanyCreate = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate("/admin/companies")}
+                onClick={() => navigate("/recruiter/companies")}
                 className="w-24"
               >
                 Cancel

@@ -44,7 +44,7 @@ const Companies = () => {
             value={searchCompanyByText || ""}
             onChange={handleSearchChange}
           />
-          <Button onClick={() => navigate("/admin/companies/create")}>
+          <Button onClick={() => navigate("/recruiter/companies/create")}>
             New Company
           </Button>
         </div>

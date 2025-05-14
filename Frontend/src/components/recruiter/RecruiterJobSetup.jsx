@@ -13,7 +13,7 @@ import useGetJobs from "../../hooks/useGetJobs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import useGetCompanies from "../../hooks/useGetCompanies";
 
-const AdminJobSetup = () => {
+const RecruiterJobSetup = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const params = useParams();
@@ -77,7 +77,7 @@ const AdminJobSetup = () => {
       );
       if (response.data.success) {
         toast.success(response.data.message);
-        navigate("/admin/jobs");
+        navigate("/recruiter/jobs");
       }
     } catch (error) {
       console.error("Job update error:", error);
@@ -95,7 +95,7 @@ const AdminJobSetup = () => {
           <Button
             variant="outline"
             className="flex items-center gap-2 text-gray-500 font-semibold mb-6"
-            onClick={() => navigate("/admin/jobs")}
+            onClick={() => navigate("/recruiter/jobs")}
             type="button"
           >
             <ArrowLeft />
@@ -275,4 +275,4 @@ const AdminJobSetup = () => {
   );
 };
 
-export default AdminJobSetup; 
+export default RecruiterJobSetup; 

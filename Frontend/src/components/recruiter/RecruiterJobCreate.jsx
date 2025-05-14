@@ -13,7 +13,7 @@ import { Textarea } from "../ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import useGetCompanies from "../../hooks/useGetCompanies";
 
-const AdminJobCreate = () => {
+const RecruiterJobCreate = () => {
   const navigate = useNavigate();
   const { allCompanies = [] } = useSelector((state) => state.company);
   const [formData, setFormData] = useState({
@@ -56,7 +56,7 @@ const AdminJobCreate = () => {
       
       if (res?.data?.success) {
         toast.success(res.data.message);
-        navigate("/admin/jobs");
+        navigate("/recruiter/jobs");
       }
     } catch (error) {
       console.error("Job creation error:", error);
@@ -212,7 +212,7 @@ const AdminJobCreate = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate("/admin/jobs")}
+                onClick={() => navigate("/recruiter/jobs")}
                 className="w-24"
               >
                 Cancel
@@ -232,4 +232,4 @@ const AdminJobCreate = () => {
   );
 };
 
-export default AdminJobCreate; 
+export default RecruiterJobCreate; 

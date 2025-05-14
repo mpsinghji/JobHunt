@@ -2,13 +2,13 @@ import React, {useState, useEffect} from "react";
 import Navbar from "../shared/Navbar";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import AdminJobsTable from "./AdminJobsTable";
+import RecruiterJobsTable from "./RecruiterJobsTable";
 import { useNavigate } from "react-router-dom";
 import useGetJobs from "../../hooks/useGetJobs";
 import { useSelector } from "react-redux";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
-const AdminJobs = () => {
+const RecruiterJobs = () => {
   const navigate = useNavigate();
   const { allJobs = [] } = useSelector((state) => state.job);
   const { isLoading, error } = useGetJobs();
@@ -81,7 +81,7 @@ const AdminJobs = () => {
               Clear Filters
             </Button>
           </div>
-          <Button onClick={() => navigate("/admin/jobs/create")}>
+          <Button onClick={() => navigate("/recruiter/jobs/create")}>
             Post New Job
           </Button>
         </div>
@@ -90,11 +90,11 @@ const AdminJobs = () => {
         ) : error ? (
           <div className="text-center py-8 text-red-500">{error}</div>
         ) : (
-          <AdminJobsTable jobs={filteredJobs} />
+          <RecruiterJobsTable jobs={filteredJobs} />
         )}
       </div>
     </>
   );
 };
 
-export default AdminJobs;
+export default RecruiterJobs;

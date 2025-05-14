@@ -61,7 +61,7 @@ const CompanySetup = () => {
       );
       if (response.data.success) {
         toast.success(response.data.message);
-        navigate("/admin/companies");
+        navigate("/recruiter/companies");
       }
     } catch (error) {
       console.log(error);
@@ -91,7 +91,7 @@ const CompanySetup = () => {
           <Button
             variant="outline"
             className="flex items-center gap-2 text-gray-500 font-semibold mb-6"
-            onClick={() => navigate("/admin/companies")}
+            onClick={() => navigate("/recruiter/companies")}
             type="button"
           >
             <ArrowLeft />
