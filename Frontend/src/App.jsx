@@ -48,7 +48,6 @@ const App = () => {
                 {/* Add status in jobs if closed then show closed in saved application and also show only open jobs in filter page */}
                 {/* delete saved jobs */}
                 {/* Open them from here also */}
-          {/* browser by category homepage */}
           {/* Admin section for approving Recruiters accounts */}
         </Routes>
       </Router>

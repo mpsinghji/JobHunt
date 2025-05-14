@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { updateApplicationStatus } from "../../redux/applicationSlice";
 import { toast } from "sonner";
-import { Eye, MoreVertical } from "lucide-react";
+import { Eye, MoreVertical, FileText } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -29,6 +29,7 @@ const ApplicantsTable = () => {
   const { currentJob } = useSelector((state) => state.application);
   const [selectedResume, setSelectedResume] = useState(null);
   const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
+  const [resumePreviewUrl, setResumePreviewUrl] = useState(null);
 
   console.log("Current Job in Table:", currentJob);
   console.log("Applications:", currentJob?.applications);
@@ -53,14 +54,41 @@ const ApplicantsTable = () => {
       toast.error("No resume available");
       return;
     }
-    setSelectedResume(resumeUrl);
-    setIsResumeModalOpen(true);
+    // Convert PDF URL to use Cloudinary's page transformation
+    const urlParts = resumeUrl.split('/upload/');
+    if (urlParts.length === 2) {
+      const baseUrl = urlParts[0] + '/upload/';
+      const publicId = urlParts[1].split('.')[0]; // Remove file extension
+      // Create a URL that uses the page transformation to convert PDF to image
+      const imageUrl = `${baseUrl}pg_1/${publicId}.jpg`;
+      setResumePreviewUrl(imageUrl);
+      setSelectedResume(resumeUrl);
+      setIsResumeModalOpen(true);
+    } else {
+      // Fallback to original URL if transformation fails
+      setResumePreviewUrl(resumeUrl);
+      setSelectedResume(resumeUrl);
+      setIsResumeModalOpen(true);
+    }
   };
 
   if (!currentJob?.applications || currentJob.applications.length === 0) {
     return (
       <div className="text-center py-8">
         <p className="text-gray-500">No applications found for this job.</p>
+      </div>
+    );
+  }
+
+  // Filter out withdrawn applications
+  const activeApplications = currentJob.applications.filter(
+    application => application.status !== "Withdrawn"
+  );
+
+  if (activeApplications.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">No active applications found for this job.</p>
       </div>
     );
   }
@@ -80,10 +108,10 @@ const ApplicantsTable = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {currentJob.applications.map((application) => {
+          {activeApplications.map((application) => {
             const applicant = application.applicant || {};
             const profile = applicant.profile || {};
-            const resumeUrl = profile.resume;
+            const resumeUrl = profile.resume?.url;
 
             return (
               <TableRow key={application._id}>
@@ -91,15 +119,19 @@ const ApplicantsTable = () => {
                 <TableCell>{applicant.email || 'N/A'}</TableCell>
                 <TableCell>{applicant.phonenumber || 'N/A'}</TableCell>
                 <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleResumeClick(resumeUrl)}
-                    className="flex items-center gap-2"
-                  >
-                    <Eye className="h-4 w-4" />
-                    View Resume
-                  </Button>
+                  {resumeUrl ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleResumeClick(resumeUrl)}
+                      className="flex items-center gap-2"
+                    >
+                      <Eye className="h-4 w-4" />
+                      View Resume
+                    </Button>
+                  ) : (
+                    <span className="text-gray-500 text-sm">No resume uploaded</span>
+                  )}
                 </TableCell>
                 <TableCell>
                   {new Date(application.createdAt).toLocaleDateString()}
@@ -161,21 +193,41 @@ const ApplicantsTable = () => {
       </Table>
 
       <Dialog open={isResumeModalOpen} onOpenChange={setIsResumeModalOpen}>
-        <DialogContent className="max-w-4xl h-[80vh]">
-          <DialogHeader>
-            <DialogTitle>Resume Preview</DialogTitle>
+        <DialogContent className="max-w-5xl h-[95vh] p-0 overflow-hidden">
+          <DialogHeader className="p-6 border-b">
+            <DialogTitle className="text-xl font-semibold">Resume Preview</DialogTitle>
           </DialogHeader>
-          {selectedResume ? (
-            <iframe
-              src={selectedResume}
-              className="w-full h-full"
-              title="Resume Preview"
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-gray-500">No resume available</p>
-            </div>
-          )}
+          <div className="flex flex-col h-full">
+            {resumePreviewUrl ? (
+              <>
+                <div className="flex-1 overflow-auto bg-gray-100 p-6 flex items-center justify-center">
+                  <div className="bg-white rounded-lg shadow-lg p-2 max-w-full max-h-full">
+                    <img 
+                      src={resumePreviewUrl} 
+                      alt="Resume Preview" 
+                      className="max-w-full max-h-[calc(90vh-200px)] object-contain"
+                    />
+                  </div>
+                </div>
+                <div className="p-4 border-t bg-gray-50 flex justify-between items-center">
+                  <Button 
+                    onClick={() => window.open(resumePreviewUrl, '_blank')}
+                    className="gap-2 bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Eye className="h-4 w-4" />
+                    Open in New Tab
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center bg-gray-100">
+                <div className="text-center p-8">
+                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500 text-lg">Failed to load resume preview</p>
+                </div>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
