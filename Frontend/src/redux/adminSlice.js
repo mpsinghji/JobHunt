@@ -3,6 +3,21 @@ import api from "../utils/api";
 import { ADMIN_API_END_POINT } from "../utils/constants";
 
 // Async thunks
+export const fetchAllUsers = createAsyncThunk(
+  "admin/fetchAllUsers",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`${ADMIN_API_END_POINT}/users`);
+      if (!response.data.success) {
+        return rejectWithValue(response.data.message || "Failed to fetch users");
+      }
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Failed to fetch users");
+    }
+  }
+);
+
 export const fetchPendingRecruiters = createAsyncThunk(
   "admin/fetchPendingRecruiters",
   async (_, { rejectWithValue }) => {
@@ -35,6 +50,11 @@ export const verifyRecruiter = createAsyncThunk(
 
 const initialState = {
   pendingRecruiters: [],
+  allUsers: {
+    recruiters: [],
+    jobseekers: [],
+    admins: []
+  },
   loading: false,
   error: null,
 };
@@ -49,6 +69,19 @@ const adminSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Fetch all users
+      .addCase(fetchAllUsers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllUsers.fulfilled, (state, action) => {
+        state.loading = false;
+        state.allUsers = action.payload;
+      })
+      .addCase(fetchAllUsers.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
       // Fetch pending recruiters
       .addCase(fetchPendingRecruiters.pending, (state) => {
         state.loading = true;

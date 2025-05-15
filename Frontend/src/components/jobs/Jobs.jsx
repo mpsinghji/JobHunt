@@ -60,23 +60,22 @@ const Jobs = () => {
   };
 
   useEffect(() => {
-    if (!allJobs) return;
+    let filtered = [...allJobs];
+    if (user && applications && applications.length > 0) {
+      // console.log('Applications:', applications);
+      
+      const appliedJobIds = applications
+        .filter(app => app && app.job && app.job._id)
+        .map(app => app.job._id)
+        .filter(id => id);
 
-    // First, filter out applied jobs
-    let filtered = allJobs.filter(job => {
-      // If user is not logged in or no applications, show all jobs
-      if (!user || !applications || applications.length === 0) {
-        return true;
-      }
+      // console.log('Applied Job IDs:', appliedJobIds);
+      // console.log('All Jobs:', allJobs.map(job => job._id));
       
-      // Check if this job is in the user's applications
-      const hasApplied = applications.some(app => 
-        app && app.job && app.job._id === job._id
-      );
+      filtered = filtered.filter(job => !appliedJobIds.includes(job._id));
       
-      // Only include jobs that haven't been applied to
-      return !hasApplied;
-    });
+      // console.log('Filtered Jobs:', filtered.map(job => job._id));
+    }
 
     // Then apply search filter
     if (searchQuery.trim()) {

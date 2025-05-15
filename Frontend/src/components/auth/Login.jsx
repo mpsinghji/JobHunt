@@ -52,21 +52,31 @@ const Login = () => {
       );
       if (response.data.success) {
         console.log("Login response:", response.data);
+        console.log("Raw user data from response:", response.data.user);
+        
         const userData = {
           ...response.data.user,
-          isVerified: response.data.user.isVerified || false // Ensure isVerified is included
+          isVerified: Boolean(response.data.user.isVerified),
+          isBanned: Boolean(response.data.user.isBanned)
         };
-        console.log("User data being stored:", userData);
+        
+        console.log("Processed user data:", userData);
+        console.log("isBanned value:", userData.isBanned);
+        console.log("isVerified value:", userData.isVerified);
+        
         dispatch(setUser(userData));
         toast.success(response.data.message || "Login successful!");
         
         if (userData.role === "Recruiter") {
-          if (userData.isVerified) {
-            console.log("User is verified, navigating to companies");
-            navigate("/companies");
-          } else {
+          if (userData.isBanned) {
+            console.log("User is banned, navigating to verification status");
+            navigate("/verification-status");
+          } else if (!userData.isVerified) {
             console.log("User is not verified, navigating to verification status");
             navigate("/verification-status");
+          } else {
+            console.log("User is verified and not banned, navigating to companies");
+            navigate("/recruiter/companies");
           }
         } else {
           navigate("/");

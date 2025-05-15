@@ -31,18 +31,19 @@ const PrivateRoute = ({ children, roles = [] }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // Check if user is banned first
+  if (user?.isBanned) {
+    return <Navigate to="/verification-status" replace />;
+  }
+
+  // Then check if user is not verified
+  if (!user?.isVerified) {
+    return <Navigate to="/verification-status" replace />;
+  }
+
+  // Finally check roles
   if (roles.length > 0 && !roles.includes(user?.role)) {
     return <Navigate to="/" replace />;
-  }
-
-  // For admin users, check if they are verified
-  if (user?.role === "admin" && !user?.isVerified) {
-    return <Navigate to="/verification-status" replace />;
-  }
-
-  // For Recruiter users, check if they are verified
-  if (user?.role === "Recruiter" && !user?.isVerified) {
-    return <Navigate to="/verification-status" replace />;
   }
 
   return children;

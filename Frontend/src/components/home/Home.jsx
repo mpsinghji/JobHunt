@@ -10,13 +10,15 @@ import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   useGetAllJobs();
-  const { user } = useSelector(store =>store.auth);
+  const { user } = useSelector(store => store.auth);
   const navigate = useNavigate();
-  useEffect(()=>{
-    if(user?.role === 'Recruiter'){
+
+  useEffect(() => {
+    if (user?.role === "Recruiter") {
       navigate("/recruiter/companies");
     }
-  },[])
+  }, [user, navigate]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
