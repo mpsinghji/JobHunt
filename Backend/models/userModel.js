@@ -22,11 +22,15 @@ const userSchema = mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["Jobseeker", "Recruiter"],
+      enum: ["Jobseeker", "Recruiter","admin"],
       required: true,
     },
     dob: {
       type: Date,
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
     },
     gender: {
       type: String,

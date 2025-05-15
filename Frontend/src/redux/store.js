@@ -14,22 +14,24 @@ import {
 import storage from 'redux-persist/lib/storage'
 import companySlice from "./companySlice";
 import applicationSlice from "./applicationSlice";
+import adminSlice from "./adminSlice";
 
 const persistConfig = {
     key: 'root',
     version: 1,
     storage,
+    whitelist: ['auth'] // Only persist auth state
 }
 
 const rootReducer = combineReducers({
-    auth:authSlice,
-    job:jobSlice,
-    company:companySlice,
-    application:applicationSlice
+    auth: authSlice,
+    job: jobSlice,
+    company: companySlice,
+    application: applicationSlice,
+    admin: adminSlice
 })
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)
-
 
 const store = configureStore({
     reducer: persistedReducer,
@@ -40,4 +42,6 @@ const store = configureStore({
             },
         }),
 });
+
+export const persistor = persistStore(store);
 export default store;

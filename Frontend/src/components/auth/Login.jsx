@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading, setUser } from "../../redux/authSlice";
+
 const Login = () => {
   const [input, setInput] = useState({
     email: "",
@@ -19,15 +20,18 @@ const Login = () => {
     role: "jobseeker",
   });
   const [showPassword, setShowPassword] = useState(false);
-  const { loading , user } = useSelector((state) => state.auth);
+  const { loading, user } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+
   const submitHandler = async (e) => {
     e.preventDefault();
     dispatch(setLoading(true));
@@ -35,7 +39,6 @@ const Login = () => {
       ...input,
       role: input.role === "jobseeker" ? "Jobseeker" : "Recruiter",
     };
-    // console.log("Login attempt with data:", loginData);
     try {
       const response = await axios.post(
         `${USER_API_END_POINT}/login`,
@@ -47,11 +50,27 @@ const Login = () => {
           withCredentials: true,
         }
       );
-      // console.log("Login response:", response.data);
       if (response.data.success) {
-        dispatch(setUser(response.data.user));
+        console.log("Login response:", response.data);
+        const userData = {
+          ...response.data.user,
+          isVerified: response.data.user.isVerified || false // Ensure isVerified is included
+        };
+        console.log("User data being stored:", userData);
+        dispatch(setUser(userData));
         toast.success(response.data.message || "Login successful!");
-        navigate("/");
+        
+        if (userData.role === "Recruiter") {
+          if (userData.isVerified) {
+            console.log("User is verified, navigating to companies");
+            navigate("/companies");
+          } else {
+            console.log("User is not verified, navigating to verification status");
+            navigate("/verification-status");
+          }
+        } else {
+          navigate("/");
+        }
       } else {
         toast.error(response.data.message || "Login failed");
       }
@@ -68,11 +87,13 @@ const Login = () => {
       dispatch(setLoading(false));
     }
   };
-  useEffect(()=>{
-    if(user){
+
+  useEffect(() => {
+    if (user) {
       navigate("/");
     }
-  })
+  });
+
   return (
     <div className="min-h-screen bg-gray-50 pt-20">
       <Navbar />
@@ -178,7 +199,7 @@ const Login = () => {
               <span className="text-sm text-gray-600">
                 Don't have an account?{" "}
                 <Link
-                  to="/signup"
+                  to="/register"
                   className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200"
                 >
                   Sign up
@@ -191,4 +212,5 @@ const Login = () => {
     </div>
   );
 };
+
 export default Login;

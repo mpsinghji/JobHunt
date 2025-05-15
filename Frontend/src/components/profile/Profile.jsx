@@ -4,7 +4,7 @@ import { Button } from '../ui/button'
 import { Edit2, Mail, Phone, MapPin, Link as LinkIcon, FileText, Briefcase, User, Code2, BookOpen, Share2, Calendar, Trash2, Eye, Pencil, MoreVertical } from 'lucide-react'
 import { Badge } from '../ui/badge'
 import { useSelector, useDispatch } from 'react-redux'
-import { setUser } from '../../redux/authSlice'
+import { updateUser } from '../../redux/authSlice'
 import UpdateProfileDialog from './UpdateProfileDialog'
 import axios from 'axios'
 import { USER_API_END_POINT } from '../../utils/constants'
@@ -34,6 +34,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
+import api from '../../utils/api'
 
 const Profile = () => {
     const { user } = useSelector((store) => store.auth);
@@ -65,7 +66,7 @@ const Profile = () => {
             );
 
             if (response.data.success) {
-                dispatch(setUser(response.data.user));
+                dispatch(updateUser(response.data.data));
                 toast.success("Profile picture removed successfully");
             } else {
                 toast.error(response.data.message || "Failed to remove profile picture");
@@ -90,7 +91,7 @@ const Profile = () => {
             );
 
             if (response.data.success) {
-                dispatch(setUser(response.data.user));
+                dispatch(updateUser(response.data.data));
                 toast.success("Resume removed successfully");
             } else {
                 toast.error(response.data.message || "Failed to remove resume");
@@ -120,7 +121,7 @@ const Profile = () => {
             );
 
             if (response.data.success) {
-                dispatch(setUser(response.data.user));
+                dispatch(updateUser(response.data.data));
                 toast.success("Resume renamed successfully");
                 setShowResumeRename(false);
             } else {
@@ -156,6 +157,26 @@ const Profile = () => {
             toast.error("No resume available to view");
         }
     };
+
+    const handleUpdateProfile = async (updatedData) => {
+        try {
+            const response = await api.put(`${USER_API_END_POINT}/update-profile`, updatedData);
+            if (response.data.success) {
+                dispatch(updateUser(response.data.data));
+                toast.success("Profile updated successfully!");
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Failed to update profile");
+        }
+    };
+
+    if (!user) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">

@@ -6,6 +6,14 @@ import { Link } from 'react-router-dom'
 
 const LatestJobs = () => { 
   const { allJobs } = useSelector((store) => store.job);
+  const { applications } = useSelector((store) => store.application);
+  const { user } = useSelector((store) => store.auth);
+
+  // Filter out applied jobs
+  const nonAppliedJobs = allJobs.filter(job => {
+    if (!user || !applications) return true;
+    return !applications.some(app => app.job._id === job._id);
+  });
 
   return (
     <div className='space-y-8'>
@@ -24,12 +32,12 @@ const LatestJobs = () => {
       </div>
       
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-        {allJobs.length <= 0 ? (
+        {nonAppliedJobs.length <= 0 ? (
           <div className="col-span-full text-center py-10">
-            <p className="text-gray-500 text-lg">No jobs found</p>
+            <p className="text-gray-500 text-lg">No new jobs available</p>
           </div>
         ) : (
-          allJobs.slice(0, 6).map((job) => (
+          nonAppliedJobs.slice(0, 6).map((job) => (
             <LatestJobCards key={job._id} item={job} />
           ))
         )}

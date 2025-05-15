@@ -14,7 +14,7 @@ const useGetJobs = (jobId = null) => {
       try {
         const endpoint = jobId
           ? `${JOB_API_END_POINT}/get/${jobId}`
-          : `${JOB_API_END_POINT}/getadminjobs`;
+          : `${JOB_API_END_POINT}/get`;
 
         const res = await fetch(endpoint, {
           credentials: "include",

@@ -10,12 +10,11 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Loader2, Mail, Phone, MapPin, Link as LinkIcon, User, Calendar, X } from "lucide-react";
 import { Button } from "../ui/button";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { USER_API_END_POINT } from "../../utils/constants";
 import axios from "axios";
 import { toast } from "sonner";
-import { setUser } from "../../redux/authSlice";
-import { useDispatch } from "react-redux";
+import api from "../../utils/api";
 import {
   Select,
   SelectContent,
@@ -24,14 +23,17 @@ import {
   SelectValue,
 } from "../ui/select";
 
-const UpdateProfileDialog = ({ open, setOpen }) => {
+const UpdateProfileDialog = ({ isOpen, onClose }) => {
+  const { user } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(false);
-  const { user } = useSelector((store) => store.auth);
   const dispatch = useDispatch();
 
-  const [input, setInput] = useState({
-    fullname: user?.fullname || "",
+  const [formData, setFormData] = useState({
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
     email: user?.email || "",
+    company: user?.company || "",
+    position: user?.position || "",
     phonenumber: user?.phonenumber || "",
     bio: user?.profile?.bio || "",
     skills: user?.profile?.skills?.join(",") || "",
@@ -51,11 +53,11 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
     resume: null
   });
 
-  const changeEventHandler = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     if (name.startsWith('socialMediaLinks.')) {
       const platform = name.split('.')[1];
-      setInput(prev => ({
+      setFormData(prev => ({
         ...prev,
         socialMediaLinks: {
           ...prev.socialMediaLinks,
@@ -63,7 +65,7 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         }
       }));
     } else {
-      setInput(prev => ({ ...prev, [name]: value }));
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
 
@@ -92,67 +94,20 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
     if (fileInput) fileInput.value = '';
   };
 
-  const submitHandler = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const formData = new FormData();
+      const response = await api.put(`${USER_API_END_POINT}/update-profile`, formData);
       
-      // Append basic info
-      formData.append("fullname", input.fullname);
-      formData.append("email", input.email);
-      formData.append("phonenumber", input.phonenumber);
-      formData.append("role", user.role);
-      formData.append("address", input.address || "");
-      formData.append("gender", input.gender || "");
-      if (input.dob) {
-        formData.append("dob", new Date(input.dob).toISOString());
-      }
-
-      // Append profile info
-      formData.append("profile.bio", input.bio || "");
-      formData.append("profile.skills", input.skills || "");
-
-      // Append social media links
-      formData.append("socialMediaLinks.linkedin", input.socialMediaLinks.linkedin || "");
-      formData.append("socialMediaLinks.github", input.socialMediaLinks.github || "");
-      formData.append("socialMediaLinks.portfolio", input.socialMediaLinks.portfolio || "");
-
-      // Append files if selected
-      if (selectedFiles.profilePhoto) {
-        formData.append("profilePhoto", selectedFiles.profilePhoto);
-      }
-      if (selectedFiles.resume) {
-        formData.append("resume", selectedFiles.resume);
-      }
-
-      // Log form data for debugging
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
-      }
-
-      const response = await axios.post(
-        `${USER_API_END_POINT}/profile/update`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data"
-          },
-          withCredentials: true
-        }
-      );
-
       if (response.data.success) {
-        dispatch(setUser(response.data.user));
-        toast.success("Profile updated successfully");
-        setOpen(false);
-      } else {
-        toast.error(response.data.message || "Failed to update profile");
+        // Update the user in Redux store
+        dispatch({ type: 'auth/updateUser', payload: response.data.data });
+        toast.success("Profile updated successfully!");
+        onClose();
       }
     } catch (error) {
-      console.error("Profile update error:", error);
-      console.error("Error response:", error.response?.data);
       toast.error(error.response?.data?.message || "Failed to update profile");
     } finally {
       setLoading(false);
@@ -160,27 +115,41 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-gray-900">Update Profile</DialogTitle>
         </DialogHeader>
-        <form onSubmit={submitHandler} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-900">Basic Information</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="fullname" className="flex items-center gap-2">
+                <Label htmlFor="firstName" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
-                  Full Name
+                  First Name
                 </Label>
                 <Input
                   type="text"
-                  id="fullname"
-                  name="fullname"
-                  value={input.fullname}
-                  onChange={changeEventHandler}
+                  id="firstName"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  className="w-full"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName" className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Last Name
+                </Label>
+                <Input
+                  type="text"
+                  id="lastName"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
                   className="w-full"
                 />
               </div>
@@ -193,8 +162,8 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                   type="email"
                   id="email"
                   name="email"
-                  value={input.email}
-                  onChange={changeEventHandler}
+                  value={formData.email}
+                  onChange={handleChange}
                   className="w-full"
                   disabled
                 />
@@ -208,8 +177,8 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                   type="tel"
                   id="phonenumber"
                   name="phonenumber"
-                  value={input.phonenumber}
-                  onChange={changeEventHandler}
+                  value={formData.phonenumber}
+                  onChange={handleChange}
                   className="w-full"
                 />
               </div>
@@ -222,8 +191,8 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                   type="text"
                   id="address"
                   name="address"
-                  value={input.address}
-                  onChange={changeEventHandler}
+                  value={formData.address}
+                  onChange={handleChange}
                   className="w-full"
                 />
               </div>
@@ -240,8 +209,8 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                   Gender
                 </Label>
                 <Select
-                  value={input.gender}
-                  onValueChange={(value) => setInput(prev => ({ ...prev, gender: value }))}
+                  value={formData.gender}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, gender: value }))}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select gender" />
@@ -262,8 +231,8 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                   type="date"
                   id="dob"
                   name="dob"
-                  value={input.dob}
-                  onChange={changeEventHandler}
+                  value={formData.dob}
+                  onChange={handleChange}
                   className="w-full"
                 />
               </div>
@@ -280,8 +249,8 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                   type="text"
                   id="bio"
                   name="bio"
-                  value={input.bio}
-                  onChange={changeEventHandler}
+                  value={formData.bio}
+                  onChange={handleChange}
                   placeholder="Write a brief description about yourself"
                 />
               </div>
@@ -291,8 +260,8 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                   type="text"
                   id="skills"
                   name="skills"
-                  value={input.skills}
-                  onChange={changeEventHandler}
+                  value={formData.skills}
+                  onChange={handleChange}
                   placeholder="Enter skills (comma separated)"
                 />
               </div>
@@ -345,8 +314,8 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                   type="url"
                   id="linkedin"
                   name="socialMediaLinks.linkedin"
-                  value={input.socialMediaLinks.linkedin}
-                  onChange={changeEventHandler}
+                  value={formData.socialMediaLinks.linkedin}
+                  onChange={handleChange}
                   placeholder="https://linkedin.com/in/your-profile"
                 />
               </div>
@@ -359,8 +328,8 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                   type="url"
                   id="github"
                   name="socialMediaLinks.github"
-                  value={input.socialMediaLinks.github}
-                  onChange={changeEventHandler}
+                  value={formData.socialMediaLinks.github}
+                  onChange={handleChange}
                   placeholder="https://github.com/your-profile"
                 />
               </div>
@@ -373,15 +342,47 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                   type="url"
                   id="portfolio"
                   name="socialMediaLinks.portfolio"
-                  value={input.socialMediaLinks.portfolio}
-                  onChange={changeEventHandler}
+                  value={formData.socialMediaLinks.portfolio}
+                  onChange={handleChange}
                   placeholder="https://your-portfolio.com"
                 />
               </div>
             </div>
           </div>
 
+          {user?.role?.toLowerCase() === "recruiter" && (
+            <>
+              <div>
+                <Label htmlFor="company" className="flex items-center gap-2">
+                  Company
+                </Label>
+                <Input
+                  id="company"
+                  name="company"
+                  value={formData.company}
+                  onChange={handleChange}
+                  className="w-full"
+                />
+              </div>
+              <div>
+                <Label htmlFor="position" className="flex items-center gap-2">
+                  Position
+                </Label>
+                <Input
+                  id="position"
+                  name="position"
+                  value={formData.position}
+                  onChange={handleChange}
+                  className="w-full"
+                />
+              </div>
+            </>
+          )}
+
           <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
             {loading ? (
               <Button className="w-full" disabled>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Updating...

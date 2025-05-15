@@ -24,7 +24,7 @@ const Signup = () => {
   });
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { loading , user } = useSelector((state) => state.auth);
+  const { loading, user } = useSelector((state) => state.auth);
 
   const changeEventHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
@@ -77,11 +77,12 @@ const Signup = () => {
       dispatch(setLoading(false));
     }
   };
-  useEffect(()=>{
-      if(user){
-        navigate("/");
-      }
-    })
+
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -122,6 +123,7 @@ const Signup = () => {
                     placeholder="Phone Number"
                     value={input.phonenumber}
                     onChange={changeEventHandler}
+                    maxLength={10}
                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     required
                   />

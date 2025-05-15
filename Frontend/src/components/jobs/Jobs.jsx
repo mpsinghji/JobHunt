@@ -8,7 +8,7 @@ import Navbar from "../shared/Navbar.jsx";
 import { useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-
+import useGetJobs from "../../hooks/useGetJobs";
 
 const Jobs = () => {
   const location = useLocation();
@@ -25,6 +25,7 @@ const Jobs = () => {
   const { allJobs } = useSelector((store) => store.job);
   const { applications } = useSelector((store) => store.application);
   const { user } = useSelector((store) => store.auth);
+  const { isLoading } = useGetJobs();
 
   useEffect(() => {
     // Get search query from URL
@@ -57,24 +58,27 @@ const Jobs = () => {
     }    
     return 0;
   };
+
   useEffect(() => {
-    let filtered = [...allJobs];
-    if (user && applications && applications.length > 0) {
-      // console.log('Applications:', applications);
-      
-      const appliedJobIds = applications
-        .filter(app => app && app.job && app.job._id)
-        .map(app => app.job._id)
-        .filter(id => id);
+    if (!allJobs) return;
 
-      // console.log('Applied Job IDs:', appliedJobIds);
-      // console.log('All Jobs:', allJobs.map(job => job._id));
+    // First, filter out applied jobs
+    let filtered = allJobs.filter(job => {
+      // If user is not logged in or no applications, show all jobs
+      if (!user || !applications || applications.length === 0) {
+        return true;
+      }
       
-      filtered = filtered.filter(job => !appliedJobIds.includes(job._id));
+      // Check if this job is in the user's applications
+      const hasApplied = applications.some(app => 
+        app && app.job && app.job._id === job._id
+      );
       
-      // console.log('Filtered Jobs:', filtered.map(job => job._id));
-    }
+      // Only include jobs that haven't been applied to
+      return !hasApplied;
+    });
 
+    // Then apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter((job) => {
@@ -96,6 +100,7 @@ const Jobs = () => {
       });
     }
     
+    // Apply other filters
     Object.entries(activeFilters).forEach(([filterType, value]) => {
       if (value) {
         filtered = filtered.filter((job) => {
@@ -122,10 +127,10 @@ const Jobs = () => {
               return true;
           }
         });
-      }    });
+      }
+    });
 
     // Shuffle the filtered jobs array for randomized display
-    // Fisher-Yates (Knuth) Shuffle algorithm
     const shuffleJobs = (array) => {
       const shuffled = [...array];
       for (let i = shuffled.length - 1; i > 0; i--) {
@@ -153,6 +158,10 @@ const Jobs = () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
+
+  useEffect(()=>{
+    scrollTo(0,0)
+  },[])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
@@ -188,12 +197,19 @@ const Jobs = () => {
               showFilters ? "block" : "hidden"
             }`}
           >
-            <FilterCard onFilterChange={handleFilterChange} activeFilters={activeFilters} />
+            <div className="sticky top-24">
+              <FilterCard onFilterChange={handleFilterChange} activeFilters={activeFilters} />
+            </div>
           </div>
 
           {/* Jobs Grid */}
           <div className={`${showFilters ? "lg:w-3/4" : "w-full"}`}>
-            {filteredJobs.length === 0 ? (
+            {isLoading ? (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="mt-4 text-gray-600">Loading jobs...</p>
+              </div>
+            ) : filteredJobs.length === 0 ? (
               <div className="text-center py-12">
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">No jobs found</h3>
                 <p className="text-gray-600">
@@ -207,25 +223,11 @@ const Jobs = () => {
                 <div className={`grid grid-cols-1 md:grid-cols-2 ${!showFilters ? 'lg:grid-cols-3' : ''} gap-6`}>
                   {currentJobs.map((job) => (
                     <div
-                      initial={{opacity:0,x:100}}
-                      animate={{opacity:1,x:0}}
-                      exit={{opacity:0,x:-100}}
-                      transition={{duration:0.5}}
                       key={job._id}
                       className="transform hover:scale-105 transition-transform duration-200"
                     >
                       <JobCard job={job} />
                     </div>
-                    // <motion.div
-                    //   initial={{opacity:0,x:100}}
-                    //   animate={{opacity:1,x:0}}
-                    //   exit={{opacity:0,x:-100}}
-                    //   transition={{duration:0.5}}
-                    //   key={job._id}
-                    //   className="transform hover:scale-105 transition-transform duration-200"
-                    // >
-                    //   <JobCard job={job} />
-                    // </motion.div>
                   ))}
                 </div>
                 

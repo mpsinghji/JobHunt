@@ -14,7 +14,7 @@ import api from "../../utils/api";
 
 const JobDescription = () => {
   const params = useParams();
-  const JobId = params.id;
+  const jobId = params.jobId;
   const { singleJob } = useSelector((store) => store.job);
   const { user } = useSelector((store) => store.auth);
   const dispatch = useDispatch();
@@ -30,7 +30,7 @@ const JobDescription = () => {
   const applyJobHandler = async () => {
     try {
       const res = await api.get(
-        `${APPLICATION_API_END_POINT}/apply/${JobId}`
+        `${APPLICATION_API_END_POINT}/apply/${jobId}`
       );
 
       if (res.data.success) {
@@ -56,7 +56,7 @@ const JobDescription = () => {
       try {
         setIsLoading(true);
         // Fetch job details
-        const jobRes = await api.get(`${JOB_API_END_POINT}/get/${JobId}`);
+        const jobRes = await api.get(`${JOB_API_END_POINT}/get/${jobId}`);
 
         if (jobRes.data.success) {
           dispatch(setSingleJob(jobRes.data.job));
@@ -84,8 +84,10 @@ const JobDescription = () => {
       }
     };
 
-    fetchJobAndCompanyDetails();
-  }, [JobId, dispatch, user?._id]);
+    if (jobId) {
+      fetchJobAndCompanyDetails();
+    }
+  }, [jobId, dispatch, user?._id]);
 
   if (isLoading) {
     return (

@@ -158,6 +158,7 @@ export const login = async (req, res) => {
       address: user.address,
       gender: user.gender,
       dob: user.dob,
+      isVerified: user.isVerified,
       socialMediaLinks: user.socialMediaLinks,
       profile: user.profile,
     };

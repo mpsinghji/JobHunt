@@ -6,7 +6,8 @@ import cookieParser from "cookie-parser";
 import userRoutes from "./routes/userRoutes.js";
 import companyRoutes from "./routes/companyRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
-import applicationRoutes from "./routes/applicationRoutes.js"
+import applicationRoutes from "./routes/applicationRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 dotenv.config();
 
@@ -57,6 +58,7 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/company", companyRoutes);
 app.use("/api/v1/job", jobRoutes);
 app.use("/api/v1/applications", applicationRoutes);
+app.use("/api/v1/admin", adminRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
