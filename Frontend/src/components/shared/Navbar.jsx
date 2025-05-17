@@ -7,7 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../redux/authSlice";
 import axios from "axios";
-import { USER_API_END_POINT } from "../../utils/constants";
+import { USER_API_END_POINT, ADMIN_API_END_POINT } from "../../utils/constants";
 import { toast } from "sonner";
 
 const Navbar = () => {
@@ -18,12 +18,28 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.get(`${USER_API_END_POINT}/logout`, {
+      const isAdmin = user?.role === "admin";
+      const logoutEndpoint = isAdmin ? `${ADMIN_API_END_POINT}/logout` : `${USER_API_END_POINT}/logout`;
+      
+      await axios.get(logoutEndpoint, {
         withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
+      
+      // Clear user data first
       dispatch(logout());
+      
+      // Then show success message
       toast.success("Logged out successfully");
-      navigate("/");
+      
+      // Finally navigate
+      if (isAdmin) {
+        navigate("/login/admin", { replace: true });
+      } else {
+        navigate("/login", { replace: true });
+      }
     } catch (error) {
       console.error("Logout error:", error);
       toast.error(

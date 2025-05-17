@@ -8,7 +8,7 @@ import { Card } from "../ui/card";
 import { Loader2, Shield } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
-import { USER_API_END_POINT } from "../../utils/constants";
+import { ADMIN_API_END_POINT } from "../../utils/constants";
 import { setUser } from "../../redux/authSlice";
 
 const AdminLogin = () => {
@@ -29,20 +29,32 @@ const AdminLogin = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        `${USER_API_END_POINT}/login`,
-        {
-          ...formData,
-          role: "admin",
-        },
-        { withCredentials: true }
+        `${ADMIN_API_END_POINT}/login`,
+        formData,
+        { 
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
       );
+      
       if (response.data.success) {
-        dispatch(setUser(response.data.user));
+        const userData = { ...response.data.user, role: "admin" };
+        dispatch(setUser(userData));
         toast.success("Login successful");
-        navigate("/admin/dashboard");
+        navigate("/admin/dashboard", { replace: true });
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Login failed");
+      const errorMessage = error.response?.data?.message || "Login failed";
+      toast.error(errorMessage);
+      
+      // Handle specific error cases
+      if (error.response?.status === 403) {
+        toast.info("Your account is pending verification. Please wait for an admin to verify your account.");
+      } else if (error.response?.status === 401) {
+        toast.error("Invalid email or password");
+      }
     } finally {
       setLoading(false);
     }

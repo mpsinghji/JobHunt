@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 import { Input } from "../ui/input";
@@ -7,7 +7,7 @@ import { Label } from "../ui/label";
 import { Loader2 } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
-import { USER_API_END_POINT } from "../../utils/constants";
+import { ADMIN_API_END_POINT } from "../../utils/constants";
 
 const AdminSignup = () => {
   const navigate = useNavigate();
@@ -29,16 +29,10 @@ const AdminSignup = () => {
     setLoading(true);
 
     try {
-      // Check if verification code matches
-      if (formData.verificationCode !== "ADMIN123") {
-        toast.error("Invalid verification code");
-        setLoading(false);
-        return;
-      }
-
-      const response = await axios.post(`${USER_API_END_POINT}/register`, {
+      console.log(`${ADMIN_API_END_POINT}/register`);
+      console.log("Form Data:", formData);
+      const response = await axios.post(`${ADMIN_API_END_POINT}/register`, {
         ...formData,
-        role: "admin",
       });
 
       if (response.data.success) {
@@ -145,6 +139,18 @@ const AdminSignup = () => {
               "Create Account"
             )}
           </Button>
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              Already have an admin account?{" "}
+              <Link
+                to="/login/admin"
+                replace
+                className="font-medium text-blue-600 hover:text-blue-500"
+              >
+                Sign in here
+              </Link>
+            </p>
+          </div>
         </form>
       </Card>
     </div>

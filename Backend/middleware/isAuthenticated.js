@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import Admin from "../models/adminModel.js";
 
 const isAuthenticated = async (req, res, next) => {
   try {
@@ -30,7 +31,25 @@ const isAuthenticated = async (req, res, next) => {
       });
     }
 
-    req.id = decoded.UserId;
+    // Check if user exists and is verified
+    const user = await Admin.findById(decoded.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (!user.isVerified) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is pending verification",
+      });
+    }
+
+    // Attach user info to request
+    req.id = decoded.id;
+    req.user = user;
     next();
   } catch (error) {
     console.error("Authentication error:", {

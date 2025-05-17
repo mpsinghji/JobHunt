@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchPendingRecruiters, verifyRecruiter, fetchAllUsers } from "../../redux/adminSlice";
+import { fetchPendingRecruiters, verifyUser, fetchAllUsers, banUser, clearAdminData } from "../../redux/adminSlice";
 import {
   Table,
   TableBody,
@@ -22,60 +22,137 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import api from "../../utils/api";
 import { ADMIN_API_END_POINT } from "../../utils/constants";
-import { Ban, CheckCircle } from "lucide-react";
+import { Ban, CheckCircle, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { debounce } from "lodash";
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
-  const { pendingRecruiters = [], allUsers, loading, error } = useSelector((state) => state.admin);
-  const [selectedRecruiter, setSelectedRecruiter] = useState(null);
+  const navigate = useNavigate();
+  const { allUsers, loading, error } = useSelector((state) => state.admin);
+  const { user: currentUser } = useSelector((state) => state.auth);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
   const [isBanModalOpen, setIsBanModalOpen] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  console.log("Current Redux State:", { allUsers, loading, error });
+  console.log("Current User:", currentUser);
+
+  // Memoize filtered users
+  const filteredUsers = useMemo(() => {
+    console.log("Filtering users with:", { searchQuery, statusFilter });
+    const filterUsers = (users) => {
+      return users.filter(user => {
+        const matchesSearch = searchQuery === "" || (
+          (user.fullname?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+          (user.email?.toLowerCase() || "").includes(searchQuery.toLowerCase())
+        );
+        
+        const matchesStatus = statusFilter === "all" ? true :
+                            statusFilter === "verified" ? user.isVerified :
+                            statusFilter === "pending" ? !user.isVerified :
+                            statusFilter === "banned" ? user.isBanned : true;
+
+        return matchesSearch && matchesStatus;
+      });
+    };
+
+    const filtered = {
+      recruiters: filterUsers(allUsers?.recruiters || []),
+      jobseekers: filterUsers(allUsers?.jobseekers || []),
+      admins: filterUsers(allUsers?.admins || [])
+    };
+
+    console.log("Filtered users:", filtered);
+    return filtered;
+  }, [allUsers, searchQuery, statusFilter]);
+
+  // Debounced search handler
+  const debouncedSearch = useCallback(
+    debounce((query) => {
+      setSearchQuery(query);
+    }, 300),
+    []
+  );
 
   useEffect(() => {
-    dispatch(fetchPendingRecruiters());
-    dispatch(fetchAllUsers());
-  }, [dispatch]);
+    if (!currentUser || currentUser.role !== "admin") {
+      console.log("Not an admin, redirecting...");
+      navigate("/login/admin");
+      return;
+    }
+
+    const fetchData = async () => {
+      try {
+        console.log("Fetching data...");
+        await dispatch(fetchAllUsers()).unwrap();
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        if (error.includes("Authentication required") || error.includes("Invalid or expired token")) {
+          navigate("/login/admin");
+        }
+      } finally {
+        setIsInitialLoading(false);
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      dispatch(clearAdminData());
+    };
+  }, [dispatch, currentUser, navigate]);
 
   useEffect(() => {
     if (error) {
       toast.error(error);
-    }
-  }, [error]);
-
-  const handleVerify = async (recruiterId) => {
-    try {
-      const res = await api.post(`${ADMIN_API_END_POINT}/verify-recruiter/${recruiterId}`);
-      if (res.data.success) {
-        toast.success("Recruiter verified successfully");
-        dispatch(fetchPendingRecruiters());
-        dispatch(fetchAllUsers());
-        setIsVerifyModalOpen(false);
-      } else {
-        toast.error(res.data.message || "Failed to verify recruiter");
+      if (error.includes("Authentication required") || error.includes("Invalid or expired token")) {
+        navigate("/login/admin");
       }
+    }
+  }, [error, navigate]);
+
+  const handleVerify = async (userId, role) => {
+    try {
+      await dispatch(verifyUser({ userId, role })).unwrap();
+      setIsVerifyModalOpen(false);
+      dispatch(fetchAllUsers());
+      dispatch(fetchPendingRecruiters());
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to verify recruiter");
+      console.error('Error verifying user:', error);
+      if (error.includes("Authentication required") || error.includes("Invalid or expired token")) {
+        navigate("/login/admin");
+      }
     }
   };
 
-  const handleBan = async (recruiterId) => {
+  const handleBan = async (userId, role) => {
     try {
-      const res = await api.post(`${ADMIN_API_END_POINT}/ban-recruiter/${recruiterId}`);
-      if (res.data.success) {
-        toast.success("Recruiter banned successfully");
-        dispatch(fetchAllUsers());
-        setIsBanModalOpen(false);
-      } else {
-        toast.error(res.data.message || "Failed to ban recruiter");
-      }
+      await dispatch(banUser({ userId, role })).unwrap();
+      setIsBanModalOpen(false);
+      dispatch(fetchAllUsers());
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to ban recruiter");
+      console.error('Error banning user:', error);
+      if (error.includes("Authentication required") || error.includes("Invalid or expired token")) {
+        navigate("/login/admin");
+      }
     }
   };
 
-  if (loading) {
+  if (isInitialLoading || loading) {
     return (
       <>
         <Navbar />
@@ -88,7 +165,31 @@ const AdminDashboard = () => {
 
   const UserTable = ({ users, title }) => (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">{title}</h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">{title}</h2>
+        <div className="flex gap-4">
+          <div className="relative">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search users..."
+              onChange={(e) => debouncedSearch(e.target.value)}
+              className="pl-8 w-[200px]"
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Users</SelectItem>
+              <SelectItem value="verified">Verified</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="banned">Banned</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -97,15 +198,15 @@ const AdminDashboard = () => {
               <TableHead>Email</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Status</TableHead>
-              {title === "Recruiters" && <TableHead className="text-right">Actions</TableHead>}
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {users.map((user) => (
               <TableRow key={user._id}>
-                <TableCell className="font-medium">{user.fullname}</TableCell>
+                <TableCell className="font-medium">{user.fullname || "N/A"}</TableCell>
                 <TableCell>{user.email}</TableCell>
-                <TableCell>{user.phonenumber}</TableCell>
+                <TableCell>{user.phonenumber || "N/A"}</TableCell>
                 <TableCell>
                   <div className="flex gap-2">
                     {user.isBanned ? (
@@ -117,55 +218,60 @@ const AdminDashboard = () => {
                     )}
                   </div>
                 </TableCell>
-                {title === "Recruiters" && (
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      {!user.isVerified && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                          onClick={() => {
-                            setSelectedRecruiter(user);
-                            setIsVerifyModalOpen(true);
-                          }}
-                        >
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          Verify
-                        </Button>
-                      )}
-                      {!user.isBanned ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => {
-                            setSelectedRecruiter(user);
-                            setIsBanModalOpen(true);
-                          }}
-                        >
-                          <Ban className="w-4 h-4 mr-1" />
-                          Ban
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                          onClick={() => {
-                            setSelectedRecruiter(user);
-                            setIsBanModalOpen(true);
-                          }}
-                        >
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          Unban
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                )}
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    {(title === "Recruiters" || title === "Admins") && !user.isVerified && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setIsVerifyModalOpen(true);
+                        }}
+                      >
+                        <CheckCircle className="w-4 h-4 mr-1" />
+                        Verify
+                      </Button>
+                    )}
+                    {!user.isBanned ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setIsBanModalOpen(true);
+                        }}
+                      >
+                        <Ban className="w-4 h-4 mr-1" />
+                        Ban
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setIsBanModalOpen(true);
+                        }}
+                      >
+                        <CheckCircle className="w-4 h-4 mr-1" />
+                        Unban
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
               </TableRow>
             ))}
+            {users.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-4">
+                  No users found
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
@@ -188,15 +294,15 @@ const AdminDashboard = () => {
           </TabsList>
 
           <TabsContent value="recruiters">
-            <UserTable users={allUsers.recruiters} title="Recruiters" />
+            <UserTable users={filteredUsers.recruiters} title="Recruiters" />
           </TabsContent>
 
           <TabsContent value="jobseekers">
-            <UserTable users={allUsers.jobseekers} title="Job Seekers" />
+            <UserTable users={filteredUsers.jobseekers} title="Job Seekers" />
           </TabsContent>
 
           <TabsContent value="admins">
-            <UserTable users={allUsers.admins} title="Admins" />
+            <UserTable users={filteredUsers.admins} title="Admins" />
           </TabsContent>
         </Tabs>
       </div>
@@ -205,9 +311,9 @@ const AdminDashboard = () => {
       <Dialog open={isVerifyModalOpen} onOpenChange={setIsVerifyModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Verify Recruiter</DialogTitle>
+            <DialogTitle>Verify User</DialogTitle>
             <DialogDescription>
-              Are you sure you want to verify this recruiter? They will be able to post jobs and create companies after verification.
+              Are you sure you want to verify this {selectedUser?.role}? They will be able to access their account and associated features after verification.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex gap-2 justify-end">
@@ -219,9 +325,9 @@ const AdminDashboard = () => {
             </Button>
             <Button
               variant="default"
-              onClick={() => handleVerify(selectedRecruiter?._id)}
+              onClick={() => handleVerify(selectedUser?._id, selectedUser?.role)}
             >
-              Verify Recruiter
+              Verify {selectedUser?.role}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -231,11 +337,11 @@ const AdminDashboard = () => {
       <Dialog open={isBanModalOpen} onOpenChange={setIsBanModalOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>{selectedRecruiter?.isBanned ? "Unban" : "Ban"} Recruiter</DialogTitle>
+            <DialogTitle>{selectedUser?.isBanned ? "Unban" : "Ban"} User</DialogTitle>
             <DialogDescription>
-              {selectedRecruiter?.isBanned 
-                ? "Are you sure you want to unban this recruiter? They will regain access to their account."
-                : "Are you sure you want to ban this recruiter? They will lose access to their account and all associated features."}
+              {selectedUser?.isBanned 
+                ? "Are you sure you want to unban this user? They will regain access to their account."
+                : "Are you sure you want to ban this user? They will lose access to their account and all associated features."}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex gap-2 justify-end">
@@ -246,10 +352,10 @@ const AdminDashboard = () => {
               Cancel
             </Button>
             <Button
-              variant={selectedRecruiter?.isBanned ? "default" : "destructive"}
-              onClick={() => handleBan(selectedRecruiter?._id)}
+              variant={selectedUser?.isBanned ? "default" : "destructive"}
+              onClick={() => handleBan(selectedUser?._id, selectedUser?.role)}
             >
-              {selectedRecruiter?.isBanned ? "Unban" : "Ban"} Recruiter
+              {selectedUser?.isBanned ? "Unban" : "Ban"} User
             </Button>
           </DialogFooter>
         </DialogContent>

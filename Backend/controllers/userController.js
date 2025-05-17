@@ -332,7 +332,7 @@ export const removeProfilePhoto = async (req, res) => {
 export const getallusers = async (req, res) => {
   try {
     // const users = await User.find();
-    const users = await User.find().select("email role");
+    const users = await User.find().select("email role fullname phonenumber");
     return res.status(200).json({ users, success: true });
   } catch (error) {
     console.log(error);
