@@ -9,9 +9,16 @@ import { useState } from "react";
 import { USER_API_END_POINT } from "../../utils/constants";
 import axios from "axios";
 import { toast } from "sonner";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, ChevronDown } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading, setUser } from "../../redux/authSlice";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+
 const Login = () => {
   const [input, setInput] = useState({
     email: "",
@@ -163,6 +170,58 @@ const Login = () => {
                     <Label className="text-sm text-gray-700">Recruiter</Label>
                   </div>
                 </RadioGroup>
+              </div>
+            </div>
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <div className="text-center">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full text-gray-600 border-gray-300 hover:bg-gray-50"
+                    >
+                      Try Demo Account <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-full" align="center">
+                    <DropdownMenuItem
+                      className="flex items-center cursor-pointer hover:bg-blue-50"
+                      onClick={() => {
+                        setInput({
+                          email: "testRecruiter@gmail.com",
+                          password: "12345678",
+                          role: "recruiter"
+                        });
+                      }}
+                    >
+                      <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      <div>
+                        <p className="font-medium">Recruiter Account</p>
+                        <p className="text-xs text-gray-500">testRecruiter@gmail.com</p>
+                      </div>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="flex items-center cursor-pointer hover:bg-green-50"
+                      onClick={() => {
+                        setInput({
+                          email: "testuser@gmail.com",
+                          password: "12345678",
+                          role: "jobseeker"
+                        });
+                      }}
+                    >
+                      <svg className="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      <div>
+                        <p className="font-medium">Job Seeker Account</p>
+                        <p className="text-xs text-gray-500">testuser@gmail.com</p>
+                      </div>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
             {loading ? (
