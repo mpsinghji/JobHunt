@@ -70,4 +70,45 @@ process.on('unhandledRejection', (err) => {
     console.error('Unhandled Promise Rejection:', err);
 });
 
+app.get("/api/health", async (req, res) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        status: "error",
+        backend: "up",
+        database: "disconnected"
+      });
+    }
+
+    await mongoose.connection.db.admin().ping();
+
+    res.status(200).json({
+      status: "ok",
+      backend: "up",
+      database: "connected"
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: "error",
+      backend: "up",
+      database: "disconnected"
+    });
+  }
+});
+
+app.head("/api/health", async (req, res) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.sendStatus(503);
+    }
+
+    await mongoose.connection.db.admin().ping();
+
+    return res.sendStatus(200);
+  } catch (error) {
+    console.error("Health check failed:", error.message);
+    return res.sendStatus(503);
+  }
+});
+
 export default app;
