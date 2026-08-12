@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import mongoose from "mongoose";
 
 import userRoutes from "./routes/userRoutes.js";
 import companyRoutes from "./routes/companyRoutes.js";
@@ -88,6 +89,7 @@ app.get("/api/health", async (req, res) => {
       database: "connected"
     });
   } catch (error) {
+    console.error("Health check error:", error);
     res.status(503).json({
       status: "error",
       backend: "up",
