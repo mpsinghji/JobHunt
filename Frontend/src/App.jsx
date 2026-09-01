@@ -17,11 +17,7 @@ import RecruiterJobSetup from "./components/recruiter/RecruiterJobSetup";
 import Applicants from "./components/recruiter/Applicants";
 import ProtectedRoutes from "./components/recruiter/ProtectedRoutes";
 
-import { BASE_BACKEND_URL } from "./utils/constants";
-
 const App = () => {
-  console.log("Current environment:", import.meta.env);
-  console.log("Backend URL:", BASE_BACKEND_URL);
   return (
     <>
       <Router>
